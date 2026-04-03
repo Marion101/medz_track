@@ -125,9 +125,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         dev_redirect();
     }
 
+    if ($action === 'reset_demo_password') {
+        $userId = (int) ($_POST['user_id'] ?? 0);
+        $targetStmt = $conn->prepare('SELECT id, email FROM users WHERE id = ? LIMIT 1');
+        $targetStmt->bind_param('i', $userId);
+        $targetStmt->execute();
+        $targetUser = $targetStmt->get_result()->fetch_assoc() ?: [];
+        $targetStmt->close();
+
+        if ($targetUser === []) {
+            dev_flash('error', 'User not found.');
+            dev_redirect();
+        }
+
+        if ((string) $targetUser['email'] === $currentEmail) {
+            dev_flash('error', 'Use this action for other demo users only.');
+            dev_redirect();
+        }
+
+        $demoPasswordHash = password_hash('user123', PASSWORD_DEFAULT);
+        $resetStmt = $conn->prepare('UPDATE users SET password = ?, reset_token = NULL, token_expiry = NULL WHERE id = ?');
+        $resetStmt->bind_param('si', $demoPasswordHash, $userId);
+        $resetStmt->execute();
+        $resetStmt->close();
+
+        log_activity($conn, $currentEmail, 'demo_password_reset', (string) $targetUser['email'] . ' -> user123');
+        dev_flash('success', 'Demo password reset for ' . (string) $targetUser['email'] . '. New password: user123');
+        dev_redirect();
+    }
+
+    if ($action === 'set_user_password') {
+        $userId = (int) ($_POST['user_id'] ?? 0);
+        $newPassword = (string) ($_POST['new_password'] ?? '');
+
+        $targetStmt = $conn->prepare('SELECT id, email FROM users WHERE id = ? LIMIT 1');
+        $targetStmt->bind_param('i', $userId);
+        $targetStmt->execute();
+        $targetUser = $targetStmt->get_result()->fetch_assoc() ?: [];
+        $targetStmt->close();
+
+        if ($targetUser === []) {
+            dev_flash('error', 'User not found.');
+            dev_redirect();
+        }
+
+        if ((string) $targetUser['email'] === $currentEmail) {
+            dev_flash('error', 'Use profile reset flow for your own account.');
+            dev_redirect();
+        }
+
+        if (strlen($newPassword) < 6) {
+            dev_flash('error', 'New password must be at least 6 characters.');
+            dev_redirect();
+        }
+
+        $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+        $updateStmt = $conn->prepare('UPDATE users SET password = ?, reset_token = NULL, token_expiry = NULL WHERE id = ?');
+        $updateStmt->bind_param('si', $passwordHash, $userId);
+        $updateStmt->execute();
+        $updateStmt->close();
+
+        log_activity($conn, $currentEmail, 'admin_password_set', (string) $targetUser['email'] . ' password changed by admin');
+        dev_flash('success', 'Password updated for ' . (string) $targetUser['email'] . '.');
+        dev_redirect();
+    }
+
     if ($action === 'delete_medicine') {
         $medicineId = (int) ($_POST['medicine_id'] ?? 0);
-        $medStmt = $conn->prepare('SELECT id, medicine_name, user_email FROM medicines WHERE id = ? LIMIT 1');
+        $medStmt = $conn->prepare('SELECT id, medicine_name, user_email, expiry_date FROM medicines WHERE id = ? LIMIT 1');
         $medStmt->bind_param('i', $medicineId);
         $medStmt->execute();
         $medicine = $medStmt->get_result()->fetch_assoc() ?: [];
@@ -142,6 +207,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $delete->bind_param('i', $medicineId);
         $delete->execute();
         $delete->close();
+
+        log_medicine_removal_alert(
+            $conn,
+            $currentEmail,
+            (string) ($medicine['user_email'] ?? ''),
+            (string) ($medicine['medicine_name'] ?? ''),
+            (string) ($medicine['expiry_date'] ?? '')
+        );
 
         log_activity($conn, $currentEmail, 'medicine_deleted', (string) ($medicine['medicine_name'] ?? '') . ' | owner: ' . (string) ($medicine['user_email'] ?? ''));
         dev_flash('success', 'Medicine deleted.');
@@ -168,7 +241,7 @@ $logs = $conn->query('SELECT user_email, action, details, created_at FROM activi
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="admin-console">
+<body class="<?= htmlspecialchars(theme_body_class('admin-console')) ?>">
     <div class="dashboard-container">
                 <aside class="sidebar">
             <div class="sidebar-header">
@@ -239,6 +312,17 @@ $logs = $conn->query('SELECT user_email, action, details, created_at FROM activi
                                                             <input type="hidden" name="user_id" value="<?= (int) $row['id'] ?>">
                                                             <button type="submit" class="dev-btn dev-btn-danger" onclick="return confirm('Delete this user and their medicines?');">Delete</button>
                                                         </form>
+                                                        <form method="post" action="" class="dev-inline-form">
+                                                            <input type="hidden" name="action" value="reset_demo_password">
+                                                            <input type="hidden" name="user_id" value="<?= (int) $row['id'] ?>">
+                                                            <button type="submit" class="dev-btn" onclick="return confirm('Reset this user password to user123?');">Reset Demo Password</button>
+                                                        </form>
+                                                        <form method="post" action="" class="dev-inline-form">
+                                                            <input type="hidden" name="action" value="set_user_password">
+                                                            <input type="hidden" name="user_id" value="<?= (int) $row['id'] ?>">
+                                                            <input type="text" name="new_password" class="dev-select" placeholder="New password" minlength="6" required>
+                                                            <button type="submit" class="dev-btn" onclick="return confirm('Set this new password for user?');">Set Password</button>
+                                                        </form>
                                                     <?php else: ?>
                                                         <span class="setting-note">Current account</span>
                                                     <?php endif; ?>
@@ -258,3 +342,4 @@ $logs = $conn->query('SELECT user_email, action, details, created_at FROM activi
     </div>
 </body>
 </html>
+

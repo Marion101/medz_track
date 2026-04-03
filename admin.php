@@ -127,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'delete_medicine') {
         $medicineId = (int) ($_POST['medicine_id'] ?? 0);
-        $medStmt = $conn->prepare('SELECT id, medicine_name, user_email FROM medicines WHERE id = ? LIMIT 1');
+        $medStmt = $conn->prepare('SELECT id, medicine_name, user_email, expiry_date FROM medicines WHERE id = ? LIMIT 1');
         $medStmt->bind_param('i', $medicineId);
         $medStmt->execute();
         $medicine = $medStmt->get_result()->fetch_assoc() ?: [];
@@ -142,6 +142,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $delete->bind_param('i', $medicineId);
         $delete->execute();
         $delete->close();
+
+        log_medicine_removal_alert(
+            $conn,
+            $currentEmail,
+            (string) ($medicine['user_email'] ?? ''),
+            (string) ($medicine['medicine_name'] ?? ''),
+            (string) ($medicine['expiry_date'] ?? '')
+        );
 
         log_activity($conn, $currentEmail, 'medicine_deleted', (string) ($medicine['medicine_name'] ?? '') . ' | owner: ' . (string) ($medicine['user_email'] ?? ''));
         dev_flash('success', 'Medicine deleted.');
@@ -168,7 +176,7 @@ $logs = $conn->query('SELECT user_email, action, details, created_at FROM activi
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="admin-console">
+<body class="<?= htmlspecialchars(theme_body_class('admin-console')) ?>">
     <div class="dashboard-container">
                 <aside class="sidebar">
             <div class="sidebar-header">
@@ -375,3 +383,4 @@ $logs = $conn->query('SELECT user_email, action, details, created_at FROM activi
     </div>
 </body>
 </html>
+

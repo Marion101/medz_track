@@ -141,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'delete_medicine') {
         $medicineId = (int) ($_POST['medicine_id'] ?? 0);
-        $medStmt = $conn->prepare('SELECT id, medicine_name, user_email FROM medicines WHERE id = ? LIMIT 1');
+        $medStmt = $conn->prepare('SELECT id, medicine_name, user_email, expiry_date FROM medicines WHERE id = ? LIMIT 1');
         $medStmt->bind_param('i', $medicineId);
         $medStmt->execute();
         $medicine = $medStmt->get_result()->fetch_assoc() ?: [];
@@ -156,6 +156,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $delete->bind_param('i', $medicineId);
         $delete->execute();
         $delete->close();
+
+        log_medicine_removal_alert(
+            $conn,
+            $currentEmail,
+            (string) ($medicine['user_email'] ?? ''),
+            (string) ($medicine['medicine_name'] ?? ''),
+            (string) ($medicine['expiry_date'] ?? '')
+        );
 
         log_activity($conn, $currentEmail, 'medicine_deleted', (string) ($medicine['medicine_name'] ?? '') . ' | owner: ' . (string) ($medicine['user_email'] ?? ''));
         dev_flash('success', 'Medicine deleted.');
@@ -197,6 +205,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($stmt->execute()) {
             $stmt->close();
+            log_medicine_addition_alert($conn, $currentEmail, $userEmail, $medicineName, $expiryDate);
             log_activity($conn, $currentEmail, 'admin_add_medicine', $medicineName . ' for ' . $userEmail . ' | category: ' . $category . ' | qty: ' . $quantity);
             dev_flash('success', 'Medicine added successfully.');
             dev_redirect();
@@ -227,7 +236,7 @@ $allUsers = $conn->query('SELECT email, name FROM users ORDER BY name ASC, email
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="admin-console">
+<body class="<?= htmlspecialchars(theme_body_class('admin-console')) ?>">
     <div class="dashboard-container">
                 <aside class="sidebar">
             <div class="sidebar-header">
@@ -348,3 +357,4 @@ $allUsers = $conn->query('SELECT email, name FROM users ORDER BY name ASC, email
     </div>
 </body>
 </html>
+

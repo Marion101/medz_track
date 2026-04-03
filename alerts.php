@@ -76,7 +76,7 @@ foreach ($medicines as $medicine) {
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="<?= htmlspecialchars(theme_body_class()) ?>">
     <div class="dashboard-container">
         <aside class="sidebar">
             <div class="sidebar-header">

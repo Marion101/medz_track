@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Enter a valid email address.';
     } else {
-        $stmt = $conn->prepare('SELECT name, password, role FROM users WHERE email = ? LIMIT 1');
+        $stmt = $conn->prepare('SELECT name, password, role, theme_preference FROM users WHERE email = ? LIMIT 1');
         $stmt->bind_param('s', $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -48,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_email'] = $email;
             $_SESSION['user_name'] = $displayName !== '' ? $displayName : $email;
             $_SESSION['user_role'] = (string) ($user['role'] ?? 'user');
+            $_SESSION['theme'] = normalize_theme_preference((string) ($user['theme_preference'] ?? 'light'));
 
             if ($rememberMe) {
                 store_remember_me($conn, $email);

@@ -4,6 +4,8 @@ declare(strict_types=1);
 require_once 'db.php';
 require_once 'auth.php';
 
+ensure_user_table($conn);
+
 $message = null;
 $messageType = 'error';
 $token = trim((string) ($_GET['token'] ?? $_POST['token'] ?? ''));

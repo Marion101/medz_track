@@ -53,13 +53,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'That email or phone number is already registered.';
         } else {
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $conn->prepare('INSERT INTO users (name, phone, email, password) VALUES (?, ?, ?, ?)');
-            $stmt->bind_param('ssss', $name, $phone, $email, $hashedPassword);
+            $themePreference = 'light';
+            $stmt = $conn->prepare('INSERT INTO users (name, phone, email, password, theme_preference) VALUES (?, ?, ?, ?, ?)');
+            $stmt->bind_param('sssss', $name, $phone, $email, $hashedPassword, $themePreference);
 
             if ($stmt->execute()) {
                 $_SESSION['user_email'] = $email;
                 $_SESSION['user_name'] = $name;
                 $_SESSION['user_role'] = 'user';
+                $_SESSION['theme'] = 'light';
                 log_activity($conn, $email, 'register_success', 'New account created');
                 header('Location: dashboard.php');
                 exit;

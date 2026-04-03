@@ -84,7 +84,7 @@ foreach ($medicines as $medicine) {
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="<?= htmlspecialchars(theme_body_class()) ?>">
     <div class="dashboard-container">
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -106,7 +106,6 @@ foreach ($medicines as $medicine) {
             <header class="top-header">
                 <h2>Welcome back, <span id="username"><?= htmlspecialchars($displayName) ?></span>!</h2>
                 <div class="header-actions">
-                    <input type="text" class="search-box" id="search-input" placeholder="Search medicines..." oninput="filterMedicines(this.value)">
                     <a href="add_medicine.php" class="add-btn"><i class="fas fa-plus"></i> Add Medicine</a>
                    <a href="export.php" class="export-btn"><i class="fas fa-download"></i> Export</a>
                 </div>
@@ -116,13 +115,14 @@ foreach ($medicines as $medicine) {
                 <div class="message <?= htmlspecialchars($messageType) ?>"><?= htmlspecialchars($message) ?></div>
             <?php endif; ?>
 
-            <section class="daily-quote">
-                <div class="quote-content">
-                    <i class="fas fa-quote-left"></i>
-                    <p id="quote-text">Stay on top of your medicines, one dose at a time.</p>
-                    <p id="quote-verse" class="quote-verse">Your health routine starts with consistency.</p>
-                </div>
-            </section>
+            <div class="dashboard-note">
+                <i class="fas fa-circle-info"></i>
+                <span>
+                    You have <strong><?= $totalMedicines ?></strong> medicines, with
+                    <strong><?= $expiringSoon ?></strong> expiring soon and
+                    <strong><?= $expired ?></strong> expired.
+                </span>
+            </div>
 
             <section class="stats-section">
                 <div class="stat-card">
@@ -189,14 +189,5 @@ foreach ($medicines as $medicine) {
             </section>
         </main>
     </div>
-    <script>
-function filterMedicines(query) {
-    const q = query.toLowerCase().trim();
-    document.querySelectorAll('#medicines-list .medicine-card').forEach(card => {
-        card.style.display = card.innerText.toLowerCase().includes(q) ? '' : 'none';
-    });
-}
-</script>
 </body>
 </html>
-

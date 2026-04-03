@@ -10,6 +10,9 @@ function ensure_user_table(mysqli $conn): void
     $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS remember_token_expires_at DATETIME DEFAULT NULL AFTER remember_token_hash");
     $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_phone_otp VARCHAR(10) DEFAULT NULL AFTER remember_token_expires_at");
     $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_phone_otp_expires_at DATETIME DEFAULT NULL AFTER reset_phone_otp");
+    $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(64) DEFAULT NULL AFTER reset_phone_otp_expires_at");
+    $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS token_expiry DATETIME DEFAULT NULL AFTER reset_token");
+    $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS theme_preference VARCHAR(10) NOT NULL DEFAULT 'light' AFTER token_expiry");
 }
 
 function ensure_activity_log_table(mysqli $conn): void
@@ -39,6 +42,50 @@ function log_activity(mysqli $conn, ?string $email, string $action, string $deta
     $stmt->bind_param('sssss', $email, $action, $details, $ipAddress, $userAgent);
     $stmt->execute();
     $stmt->close();
+}
+
+function medicine_is_expired(?string $expiryDate): bool
+{
+    if ($expiryDate === null || trim($expiryDate) === '') {
+        return false;
+    }
+
+    $today = (new DateTimeImmutable('today'))->format('Y-m-d');
+    return trim($expiryDate) < $today;
+}
+
+function log_medicine_removal_alert(
+    mysqli $conn,
+    ?string $removedByEmail,
+    ?string $ownerEmail,
+    string $medicineName,
+    ?string $expiryDate
+): void {
+    $isExpired = medicine_is_expired($expiryDate);
+    $details = 'Medicine removed | expiry_status: ' . ($isExpired ? 'expired' : 'not_expired')
+        . ' | medicine: ' . trim($medicineName)
+        . ' | owner: ' . trim((string) $ownerEmail)
+        . ' | removed_by: ' . trim((string) $removedByEmail)
+        . ' | expiry: ' . trim((string) $expiryDate);
+
+    log_activity($conn, $removedByEmail, 'med_removed', $details);
+}
+
+function log_medicine_addition_alert(
+    mysqli $conn,
+    ?string $addedByEmail,
+    ?string $ownerEmail,
+    string $medicineName,
+    ?string $expiryDate
+): void {
+    $isExpired = medicine_is_expired($expiryDate);
+    $details = 'Medicine added | expiry_status: ' . ($isExpired ? 'expired' : 'not_expired')
+        . ' | medicine: ' . trim($medicineName)
+        . ' | owner: ' . trim((string) $ownerEmail)
+        . ' | added_by: ' . trim((string) $addedByEmail)
+        . ' | expiry: ' . trim((string) $expiryDate);
+
+    log_activity($conn, $addedByEmail, 'med_added', $details);
 }
 
 function remember_cookie_name(): string
@@ -146,7 +193,7 @@ function bootstrap_session_from_cookie(mysqli $conn): void
     }
 
     $tokenHash = hash('sha256', $token);
-    $stmt = $conn->prepare('SELECT email, name, role FROM users WHERE remember_token_hash = ? AND remember_token_expires_at > NOW() LIMIT 1');
+    $stmt = $conn->prepare('SELECT email, name, role, theme_preference FROM users WHERE remember_token_hash = ? AND remember_token_expires_at > NOW() LIMIT 1');
     $stmt->bind_param('s', $tokenHash);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -161,6 +208,7 @@ function bootstrap_session_from_cookie(mysqli $conn): void
     $_SESSION['user_email'] = (string) $user['email'];
     $_SESSION['user_name'] = trim((string) ($user['name'] ?? '')) !== '' ? (string) $user['name'] : (string) $user['email'];
     $_SESSION['user_role'] = (string) ($user['role'] ?? 'user');
+    $_SESSION['theme'] = normalize_theme_preference((string) ($user['theme_preference'] ?? 'light'));
 }
 
 function require_auth(mysqli $conn): void
@@ -177,4 +225,28 @@ function normalize_phone(string $phone): string
 {
     $phone = trim($phone);
     return preg_replace('/[^0-9+]/', '', $phone) ?? '';
+}
+
+function normalize_theme_preference(string $theme): string
+{
+    return $theme === 'dark' ? 'dark' : 'light';
+}
+
+function current_theme_preference(): string
+{
+    return normalize_theme_preference((string) ($_SESSION['theme'] ?? 'light'));
+}
+
+function theme_body_class(string $baseClass = ''): string
+{
+    $classes = [];
+    if (trim($baseClass) !== '') {
+        $classes[] = trim($baseClass);
+    }
+
+    if (current_theme_preference() === 'dark') {
+        $classes[] = 'dark-theme';
+    }
+
+    return implode(' ', $classes);
 }

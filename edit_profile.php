@@ -22,30 +22,73 @@ $email = $_SESSION['user_email'];
 $message = null;
 $messageType = 'error';
 
-$stmt = $conn->prepare('SELECT name, email FROM users WHERE email = ?');
+$stmt = $conn->prepare('SELECT name, email, password FROM users WHERE email = ?');
 $stmt->bind_param('s', $email);
 $stmt->execute();
 $result = $stmt->get_result();
-$user = $result->fetch_assoc() ?: ['name' => '', 'email' => $email];
+$user = $result->fetch_assoc() ?: ['name' => '', 'email' => $email, 'password' => ''];
 $stmt->close();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim((string) ($_POST['name'] ?? ''));
+    $action = (string) ($_POST['action'] ?? 'update_profile');
 
-    if ($name === '') {
-        $message = 'Please enter a name.';
-    } else {
-        $update = $conn->prepare('UPDATE users SET name = ? WHERE email = ?');
-        $update->bind_param('ss', $name, $email);
+    if ($action === 'update_profile') {
+        $name = trim((string) ($_POST['name'] ?? ''));
 
-        if ($update->execute()) {
-            log_activity($conn, $email, 'profile_update', 'Display name changed');
-            header('Location: profile.php?updated=1');
-            exit;
+        if ($name === '') {
+            $message = 'Please enter a name.';
+        } else {
+            $update = $conn->prepare('UPDATE users SET name = ? WHERE email = ?');
+            $update->bind_param('ss', $name, $email);
+
+            if ($update->execute()) {
+                log_activity($conn, $email, 'profile_update', 'Display name changed');
+                $messageType = 'success';
+                $message = 'Profile updated successfully.';
+                $user['name'] = $name;
+            } else {
+                $message = 'Could not update your profile. Please try again.';
+            }
+
+            $update->close();
         }
+    }
 
-        $message = 'Could not update your profile. Please try again.';
-        $update->close();
+    if ($action === 'change_password') {
+        $currentPassword = (string) ($_POST['current_password'] ?? '');
+        $newPassword = (string) ($_POST['new_password'] ?? '');
+        $confirmPassword = (string) ($_POST['confirm_password'] ?? '');
+
+        $isStrong = strlen($newPassword) >= 8
+            && preg_match('/[A-Z]/', $newPassword)
+            && preg_match('/[a-z]/', $newPassword)
+            && preg_match('/[0-9]/', $newPassword)
+            && preg_match('/[^A-Za-z0-9]/', $newPassword);
+
+        if ($currentPassword === '' || $newPassword === '' || $confirmPassword === '') {
+            $message = 'Please fill all password fields.';
+        } elseif (!password_verify($currentPassword, (string) ($user['password'] ?? ''))) {
+            $message = 'Current password is incorrect.';
+        } elseif ($newPassword !== $confirmPassword) {
+            $message = 'New passwords do not match.';
+        } elseif (!$isStrong) {
+            $message = 'New password must be 8+ chars with uppercase, lowercase, number, and symbol.';
+        } else {
+            $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+            $updatePassword = $conn->prepare('UPDATE users SET password = ?, reset_token = NULL, token_expiry = NULL WHERE email = ?');
+            $updatePassword->bind_param('ss', $newPasswordHash, $email);
+
+            if ($updatePassword->execute()) {
+                log_activity($conn, $email, 'password_changed', 'Changed from profile page');
+                $messageType = 'success';
+                $message = 'Password changed successfully.';
+                $user['password'] = $newPasswordHash;
+            } else {
+                $message = 'Could not change password. Please try again.';
+            }
+
+            $updatePassword->close();
+        }
     }
 }
 ?>
@@ -58,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="<?= htmlspecialchars(theme_body_class()) ?>">
     <div class="dashboard-container">
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -92,6 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <section class="medicines-section">
                 <form method="post" action="" class="modal-content medicine-form-panel">
+                    <input type="hidden" name="action" value="update_profile">
                     <div class="form-group">
                         <label for="name">Display Name *</label>
                         <input type="text" id="name" name="name" value="<?= htmlspecialchars((string) ($user['name'] ?? '')) ?>" placeholder="Your name" required>
@@ -101,6 +145,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <input type="email" id="email" value="<?= htmlspecialchars((string) ($user['email'] ?? $email)) ?>" disabled>
                     </div>
                     <button type="submit" class="btn-submit">Save Changes</button>
+                </form>
+
+                <form method="post" action="" class="modal-content medicine-form-panel" style="margin-top:16px;">
+                    <input type="hidden" name="action" value="change_password">
+                    <div class="form-group">
+                        <label for="current_password">Current Password *</label>
+                        <input type="password" id="current_password" name="current_password" autocomplete="current-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new_password">New Password *</label>
+                        <input type="password" id="new_password" name="new_password" autocomplete="new-password" minlength="8" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm New Password *</label>
+                        <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" minlength="8" required>
+                    </div>
+                    <button type="submit" class="btn-submit">Change Password</button>
                 </form>
             </section>
         </main>

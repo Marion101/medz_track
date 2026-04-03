@@ -10,6 +10,8 @@ require_once __DIR__ . '/phpmailer/src/SMTP.php';
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 
+ensure_user_table($conn);
+
 $message = null;
 $messageType = 'error';
 

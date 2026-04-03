@@ -140,6 +140,11 @@ body {
     flex-wrap: wrap;
 }
 
+.header-actions .add-btn,
+.header-actions .export-btn {
+    margin-bottom: 0;
+}
+
 .search-box {
     padding: 10px 14px;
     border: 2px solid #f0e6e7;
@@ -195,6 +200,28 @@ body {
     font-size: 13px;
     opacity: 0.85;
 }
+
+.dashboard-note {
+    margin: 16px 0 18px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #fff4f6;
+    border: 1px solid #f2d5dc;
+    color: #7a5861;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.dashboard-note i {
+    color: #DE8389;
+}
+
+.dashboard-note strong {
+    color: #c45d6b;
+}
+
 
 .stats-section {
     display: grid;
@@ -864,6 +891,10 @@ body {
         grid-template-columns: 1fr;
     }
 
+    .dashboard-spotlight {
+        grid-template-columns: 1fr;
+    }
+
     .profile-stats {
         grid-template-columns: 1fr;
     }
@@ -1117,4 +1148,93 @@ body {
 .admin-console .sidebar-nav .nav-item.active:hover {
     background: linear-gradient(135deg, #5c1d2c 0%, #7a2e42 100%);
     color: white;
+}
+
+/* Dark theme */
+body.dark-theme {
+    background: linear-gradient(180deg, #12161c 0%, #0f1218 50%, #0b0e13 100%);
+    color: #e8edf4;
+}
+
+body.dark-theme .sidebar,
+body.dark-theme .stat-card,
+body.dark-theme .medicine-card,
+body.dark-theme .modal-content,
+body.dark-theme .profile-card,
+body.dark-theme .settings-card,
+body.dark-theme .about-card,
+body.dark-theme .dev-panel {
+    background: #161b22;
+    border-color: #2a313b;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+}
+
+body.dark-theme .sidebar {
+    border-right-color: #2a313b;
+}
+
+body.dark-theme .top-header h2,
+body.dark-theme .medicine-card h3,
+body.dark-theme .profile-info h3,
+body.dark-theme .about-card h3,
+body.dark-theme .settings-card h3,
+body.dark-theme .dev-panel h3,
+body.dark-theme .form-group label,
+body.dark-theme .setting-item h4,
+body.dark-theme .dev-table th,
+body.dark-theme .dev-table td,
+body.dark-theme .profile-stat .stat-label {
+    color: #e8edf4;
+}
+
+body.dark-theme .nav-item,
+body.dark-theme .profile-label,
+body.dark-theme .medicine-card p,
+body.dark-theme .about-card p,
+body.dark-theme .setting-item p,
+body.dark-theme .stat-label,
+body.dark-theme .empty-cell {
+    color: #b6c0cd;
+}
+
+body.dark-theme .nav-item:hover {
+    background: #232a34;
+}
+
+body.dark-theme .search-box,
+body.dark-theme .form-group input,
+body.dark-theme .form-group select,
+body.dark-theme .dev-select {
+    background: #0f141b;
+    border-color: #2a313b;
+    color: #e8edf4;
+}
+
+body.dark-theme .dev-table th,
+body.dark-theme .dev-table td,
+body.dark-theme .setting-item {
+    border-bottom-color: #27303a;
+    border-top-color: #27303a;
+}
+
+body.dark-theme .dev-table tbody tr:hover {
+    background: #1d2530;
+}
+
+body.dark-theme .profile-stat,
+body.dark-theme .empty-state {
+    background: #1b222c;
+    border-color: #2a313b;
+    color: #b6c0cd;
+}
+
+body.dark-theme .dashboard-note {
+    background: #1b222c;
+    border-color: #2a313b;
+    color: #b6c0cd;
+}
+
+body.dark-theme .dashboard-note i,
+body.dark-theme .dashboard-note strong {
+    color: #f4a2aa;
 }

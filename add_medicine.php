@@ -53,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param('sssiss', $email, $medicineName, $dosage, $quantity, $expiryDate, $category);
 
         if ($stmt->execute()) {
+            log_medicine_addition_alert($conn, $email, $email, $medicineName, $expiryDate);
             log_activity($conn, $email, 'add_medicine', $medicineName . ' | category: ' . $category . ' | qty: ' . $quantity);
             $stmt->close();
             header('Location: dashboard.php?added=1');
@@ -73,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="<?= htmlspecialchars(theme_body_class()) ?>">
     <div class="dashboard-container">
         <aside class="sidebar">
             <div class="sidebar-header">

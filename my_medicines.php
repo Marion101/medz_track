@@ -37,7 +37,7 @@ $messageType = 'success';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_medicine_id'])) {
     $deleteId = (int) $_POST['delete_medicine_id'];
-    $lookup = $conn->prepare('SELECT medicine_name FROM medicines WHERE id = ? AND user_email = ? LIMIT 1');
+    $lookup = $conn->prepare('SELECT medicine_name, expiry_date FROM medicines WHERE id = ? AND user_email = ? LIMIT 1');
     $lookup->bind_param('is', $deleteId, $email);
     $lookup->execute();
     $medicineRow = $lookup->get_result()->fetch_assoc() ?: [];
@@ -48,6 +48,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_medicine_id'])
     $deleteStmt->execute();
     $deleteStmt->close();
     if ($medicineRow !== []) {
+        log_medicine_removal_alert(
+            $conn,
+            $email,
+            $email,
+            (string) ($medicineRow['medicine_name'] ?? ''),
+            (string) ($medicineRow['expiry_date'] ?? '')
+        );
         log_activity($conn, $email, 'medicine_deleted', (string) ($medicineRow['medicine_name'] ?? ''));
     }
     header('Location: my_medicines.php?deleted=1');
@@ -79,7 +86,7 @@ $stmt->close();
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="<?= htmlspecialchars(theme_body_class()) ?>">
     <div class="dashboard-container">
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -105,6 +112,9 @@ $stmt->close();
                     </svg>
                 </a>
                 <h2>My Medicines</h2>
+                <div class="header-actions">
+                    <input type="text" class="search-box" id="search-input" placeholder="Search medicines..." oninput="filterMedicines(this.value)">
+                </div>
             </header>
 
             <?php if ($message !== null): ?>
@@ -113,7 +123,7 @@ $stmt->close();
 
             <section class="medicines-section">
                 <h3>All Saved Medicines</h3>
-                <div class="medicines-list">
+                <div class="medicines-list" id="medicines-list">
                     <?php if ($medicines === []): ?>
                         <div class="empty-state">
                             <i class="fas fa-inbox"></i>
@@ -141,6 +151,13 @@ $stmt->close();
             </section>
         </main>
     </div>
+    <script>
+function filterMedicines(query) {
+    const q = query.toLowerCase().trim();
+    document.querySelectorAll('#medicines-list .medicine-card').forEach(card => {
+        card.style.display = card.innerText.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+    </script>
 </body>
 </html>
-
