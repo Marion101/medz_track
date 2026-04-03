@@ -1,0 +1,759 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+ 
+#back-arrow {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 24px;
+    height: 24px;
+    color: #DE8389;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #DE8389 0%, #F4C9D6 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    width: 100%;
+    max-width: 420px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.tabs {
+    display: flex;
+    background: #f8f9fa;
+    border-bottom: 2px solid #eee;
+}
+
+.tab {
+    flex: 1;
+    padding: 16px;
+    cursor: pointer;
+    text-align: center;
+    border: none;
+    background: none;
+    font-weight: 600;
+    font-size: 15px;
+    color: #999;
+    transition: all 0.3s ease;
+}
+
+.tab:hover {
+    background: #f0f0f0;
+}
+
+.tab.active {
+    color: #DE8389;
+    border-bottom: 3px solid #DE8389;
+    background: white;
+}
+
+.form-container {
+    padding: 40px;
+}
+
+.form {
+    opacity: 0;
+    display: none;
+    transform: translateY(10px);
+    transition: all 0.4s ease;
+}
+
+.form.active {
+    opacity: 1;
+    display: block;
+    transform: translateY(0);
+}
+
+.form h2 {
+    margin-bottom: 25px;
+    color: #333;
+    font-size: 24px;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 18px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 12px;
+    transition: all 0.3s ease;
+}
+
+.input-group:focus-within {
+    border-bottom-color: #DE8389;
+}
+
+.input-group i {
+    color: #DE8389;
+    margin-right: 12px;
+    font-size: 16px;
+}
+
+.input-group input {
+    border: none;
+    outline: none;
+    flex: 1;
+    font-size: 15px;
+    font-family: 'Poppins', sans-serif;
+    background: transparent;
+}
+
+.input-group input::placeholder {
+    color: #bbb;
+}
+
+.password-group {
+    position: relative;
+    padding-right: 44px;
+}
+
+.password-group input {
+    padding-right: 8px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 40px;
+    border: none;
+    background: transparent;
+    color: #DE8389;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    outline: none;
+}
+
+.password-toggle i {
+    pointer-events: none;
+}
+
+.password-toggle:hover {
+    color: #c96e77;
+}
+
+/* Admin login theme */
+body.admin-login {
+    background: linear-gradient(135deg, #5c1d2c 0%, #7a2e42 45%, #f6dbe2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.admin-login .container {
+    box-shadow: 0 16px 45px rgba(92, 29, 44, 0.28);
+    max-width: 520px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    overflow: visible;
+}
+
+body.admin-login .input-group:focus-within {
+    border-bottom-color: #5c1d2c;
+}
+
+body.admin-login .input-group i,
+body.admin-login .forgot,
+body.admin-login .signup-link a,
+body.admin-login .password-toggle {
+    color: #5c1d2c;
+}
+
+body.admin-login .btn {
+    background: linear-gradient(135deg, #5c1d2c 0%, #7a2e42 100%);
+    box-shadow: 0 4px 15px rgba(92, 29, 44, 0.28);
+}
+
+body.admin-login .btn:hover {
+    box-shadow: 0 6px 20px rgba(92, 29, 44, 0.36);
+}
+
+body.admin-login .social-icon:hover {
+    border-color: #5c1d2c;
+}
+
+body.admin-login .form-container {
+    padding: 42px 38px 38px;
+}
+
+body.admin-login .form {
+    display: block;
+    opacity: 1;
+    transform: none;
+}
+
+body.admin-login .admin-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(92, 29, 44, 0.08);
+    color: #5c1d2c;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+    margin-bottom: 14px;
+}
+
+body.admin-login .admin-subtitle {
+    text-align: center;
+    margin-top: -8px;
+    margin-bottom: 20px;
+    color: #9b5b6b;
+    font-size: 14px;
+}
+
+body.admin-login .signup-link {
+    margin-top: 22px;
+}
+
+.remember-forgot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+    font-size: 13px;
+}
+
+.remember label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: #666;
+}
+
+.remember input {
+    margin-right: 6px;
+    cursor: pointer;
+    accent-color: #DE8389;
+}
+
+.forgot {
+    color: #DE8389;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.forgot:hover {
+    text-decoration: underline;
+}
+
+.btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #DE8389 0%, #F4C9D6 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(222, 131, 137, 0.3);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(222, 131, 137, 0.4);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.social-login {
+    text-align: center;
+    margin: 25px 0;
+}
+
+.social-text {
+    font-size: 13px;
+    color: #999;
+    margin-bottom: 12px;
+}
+
+.social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.social-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 20px;
+    background: #f5f5f5;
+    color: #DE8389;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.social-icon:hover {
+    background: white;
+    border-color: #DE8389;
+    transform: scale(1.1);
+}
+
+.signup-link {
+    text-align: center;
+    font-size: 13px;
+    margin-top: 20px;
+    color: #666;
+}
+
+.signup-link a {
+    color: #DE8389;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.signup-link a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+    .container {
+        margin: 20px;
+        border-radius: 10px;
+    }
+
+    .form-container {
+        padding: 30px 20px;
+    }
+
+    .form h2 {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+}
+
+/* Dashboard CSS */
+.dashboard-container {
+    display: flex;
+    height: 100vh;
+    background: white;
+}
+
+.sidebar {
+    width: 250px;
+    background: white;
+    border-right: 1px solid #eee;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.sidebar-header h1 {
+    color: #DE8389;
+    font-size: 24px;
+    margin-bottom: 30px;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.nav-item {
+    padding: 12px 15px;
+    text-decoration: none;
+    color: #666;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.nav-item:hover {
+    background: #f5f5f5;
+    color: #DE8389;
+}
+
+.nav-item.active {
+    background: #f5f5f5;
+    color: #DE8389;
+}
+
+.main-content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.top-header {
+    margin-bottom: 30px;
+}
+
+.top-header h2 {
+    color: #333;
+    font-size: 28px;
+}
+
+.quote-section {
+    background: #fff5f5;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+#quote-text {
+    font-size: 16px;
+    font-style: italic;
+    color: #DE8389;
+    margin-bottom: 10px;
+}
+
+.stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #DE8389;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+}
+
+.add-btn {
+    background: #DE8389;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.add-btn:hover {
+    background: #d07078;
+}
+
+.medicines-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.medicine-card {
+    background: white;
+    padding: 20px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.medicine-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.medicine-card h3 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.medicine-card p {
+    font-size: 13px;
+    color: #666;
+    margin: 5px 0;
+}
+
+.card-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.card-buttons button {
+    flex: 1;
+    padding: 8px;
+    background: #DE8389;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.card-buttons button:hover {
+    background: #d07078;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    font-size: 20px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+}
+
+#add-medicine-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn-submit {
+    background: #DE8389;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-submit:hover {
+    background: #d07078;
+}
+
+/* Profile Page */
+.profile-section {
+    max-width: 600px;
+}
+
+.profile-card {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+.profile-picture-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.profile-picture {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #DE8389;
+}
+
+#picture-upload {
+    display: none;
+}
+
+.upload-btn {
+    background: #DE8389;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+.upload-btn:hover {
+    background: #d07078;
+}
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.profile-stat {
+    text-align: center;
+}
+
+.profile-stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #DE8389;
+}
+
+.profile-stat-label {
+    font-size: 12px;
+    color: #999;
+}
+
+.about-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #DE8389;
+}
+
+.about-card h3 {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.about-card p {
+    font-size: 13px;
+    color: #666;
+    margin: 10px 0;
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #eee;
+    }
+
+    .sidebar-nav {
+        flex-direction: row;
+        gap: 10px;
+    }
+
+    .main-content {
+        padding: 20px;
+    }
+
+    .medicines-list {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Message states */
+.auth-message,
+.message {
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    border-left: 5px solid transparent;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.auth-message.error,
+.message.error {
+    background: #ffe8ea;
+    color: #a11f35;
+    border-left-color: #d83a4a;
+}
+
+.auth-message.success,
+.message.success {
+    background: #e7f8ee;
+    color: #146a3d;
+    border-left-color: #2f9e56;
+}
+
+.auth-message.warning,
+.message.warning {
+    background: #fff4df;
+    color: #8a5a00;
+    border-left-color: #f0a020;
+}
+
+.auth-message.info,
+.message.info {
+    background: #e8f2ff;
+    color: #1355a5;
+    border-left-color: #3b82f6;
+}
