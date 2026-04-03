@@ -535,7 +535,7 @@ body {
 }
 
 .btn-submit {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #DE8389 0%, #F4C9D6 100%);
     color: white;
     padding: 12px;
     border: none;
@@ -543,12 +543,12 @@ body {
     cursor: pointer;
     font-weight: 600;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 15px rgba(222, 131, 137, 0.3);
 }
 
 .btn-submit:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 20px rgba(222, 131, 137, 0.4);
 }
 
 .medicine-form-panel {

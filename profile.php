@@ -132,14 +132,6 @@ if (isset($_GET['theme_updated'])) {
 
             <section class="profile-section">
                 <div class="profile-card">
-                    <div class="profile-picture-container">
-                        <img id="profile-picture" src="https://via.placeholder.com/150?text=User" alt="Profile Picture" class="profile-picture">
-                        <label for="picture-upload" class="picture-upload-btn">
-                            <i class="fas fa-camera"></i>
-                        </label>
-                        <input type="file" id="picture-upload" accept="image/*" style="display: none;">
-                    </div>
-
                     <div class="profile-info">
                         <h3 id="profile-username"><?= htmlspecialchars($displayName) ?></h3>
                         <p class="profile-label"><?= htmlspecialchars($email) ?></p>

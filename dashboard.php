@@ -57,7 +57,6 @@ $stmt->close();
 $totalMedicines = count($medicines);
 $expiringSoon = 0;
 $expired = 0;
-$goodStock = 0;
 $today = new DateTimeImmutable('today');
 
 foreach ($medicines as $medicine) {
@@ -70,9 +69,6 @@ foreach ($medicines as $medicine) {
         $expiringSoon++;
     }
 
-    if ((int) $medicine['quantity'] > 5) {
-        $goodStock++;
-    }
 }
 ?>
 <!DOCTYPE html>
@@ -155,15 +151,6 @@ foreach ($medicines as $medicine) {
                     </div>
                 </div>
 
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: #6bcf7f;">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="stat-info">
-                        <p class="stat-label">Good Stock</p>
-                        <p class="stat-value"><?= $goodStock ?></p>
-                    </div>
-                </div>
             </section>
 
             <section class="medicines-section">
