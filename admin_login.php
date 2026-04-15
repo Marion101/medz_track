@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="admin-login">
     <div class="container auth-container">
         <div class="form-container">
-            <form class="form active" id="admin-login-form" action="" method="post">
+            <form class="form active" id="admin-login-form" action="" method="post" autocomplete="on">
                 <div class="admin-badge">ADMIN ACCESS</div>
                 <h2>Admin Console</h2>
                 <p class="admin-subtitle">Restricted access for the admin team.</p>
@@ -101,7 +101,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label class="remember">
                         <input type="checkbox" name="remember_me"> Remember me
                     </label>
-                    <a href="forgotpassword.php" class="forgot">Forgot Password?</a>
                 </div>
 
                 <button type="submit" class="btn">Admin Login</button>
@@ -126,3 +125,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </script>
 </body>
 </html>
+

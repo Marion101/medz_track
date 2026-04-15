@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
  
         <div class="form-container">
-            <form class="form active" id="login-form" action="" method="post">
+            <form class="form active" id="login-form" action="" method="post" autocomplete="on">
                 <h2>Welcome!</h2>
 
                 <?php if ($error !== null): ?>
@@ -108,7 +108,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label class="remember">
                         <input type="checkbox" name="remember_me"> Remember me
                     </label>
-                    <a href="forgotpassword.php" class="forgot">Forgot Password?</a>
                 </div>
 
                 <button type="submit" class="btn">Login</button>
@@ -137,5 +136,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </script>
 </body>
 </html>
+
 
 

@@ -147,8 +147,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <button type="submit" class="btn-submit">Save Changes</button>
                 </form>
 
-                <form method="post" action="" class="modal-content medicine-form-panel" style="margin-top:16px;">
+                <form method="post" action="" class="modal-content medicine-form-panel" style="margin-top:16px;" autocomplete="on">
                     <input type="hidden" name="action" value="change_password">
+                    <input type="hidden" name="username" value="<?= htmlspecialchars((string) ($user['email'] ?? $email)) ?>" autocomplete="username">
                     <div class="form-group">
                         <label for="current_password">Current Password *</label>
                         <input type="password" id="current_password" name="current_password" autocomplete="current-password" required>
