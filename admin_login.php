@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Enter a valid email address.';
     } else {
-        $stmt = $conn->prepare('SELECT name, password, role, theme_preference FROM users WHERE email = ? LIMIT 1');
+        $stmt = $conn->prepare('SELECT name, password, role, theme_preference, failed_login_attempts, locked_until FROM users WHERE email = ? LIMIT 1');
         $stmt->bind_param('s', $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -37,11 +37,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $hashedPassword = (string) ($user['password'] ?? '');
         $role = (string) ($user['role'] ?? 'user');
+        $lockedUntil = isset($user['locked_until']) ? (string) $user['locked_until'] : null;
 
-        if ($hashedPassword !== '' && password_verify($password, $hashedPassword)) {
-        if ($role !== 'admin') {
-            $error = 'This account is not allowed to access the admin console.';
-        } else {
+        if ($user !== [] && is_login_locked($lockedUntil)) {
+            $error = login_lock_message($lockedUntil);
+            log_activity($conn, $email, 'admin_login_blocked', 'Account temporarily locked');
+        } elseif (password_matches_or_legacy($password, $hashedPassword)) {
+            clear_login_failures($conn, $email);
+            upgrade_password_hash_if_legacy($conn, $email, $password, $hashedPassword);
+            if ($role !== 'admin') {
+                $error = 'This account is not allowed to access the admin console.';
+                log_activity($conn, $email, 'admin_login_failed', 'Non-admin account attempted admin login');
+            } else {
                 $_SESSION['user_email'] = $email;
                 $_SESSION['user_name'] = trim((string) ($user['name'] ?? '')) !== '' ? (string) $user['name'] : $email;
                 $_SESSION['user_role'] = 'admin';
@@ -58,7 +65,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
         } else {
-            $error = 'Invalid email or password.';
+            if ($user !== []) {
+                record_login_failure($conn, $email);
+                $lockStmt = $conn->prepare('SELECT locked_until FROM users WHERE email = ? LIMIT 1');
+                $lockStmt->bind_param('s', $email);
+                $lockStmt->execute();
+                $lockData = $lockStmt->get_result()->fetch_assoc() ?: [];
+                $lockStmt->close();
+                $newLockedUntil = isset($lockData['locked_until']) ? (string) $lockData['locked_until'] : null;
+
+                if (is_login_locked($newLockedUntil)) {
+                    $error = login_lock_message($newLockedUntil);
+                    log_activity($conn, $email, 'admin_login_blocked', 'Account temporarily locked after failed attempts');
+                } else {
+                    $error = 'Invalid email or password.';
+                }
+            } else {
+                $error = 'Invalid email or password.';
+            }
+
+            log_activity($conn, $email, 'admin_login_failed', 'Invalid email or password');
         }
     }
 }
@@ -68,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - Medicine Expiry Tracker</title>
+    <title>Admin Login-medztrack</title>
     <link rel="stylesheet" href="Login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -93,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="fas fa-lock"></i>
                     <input type="password" id="admin-password" name="password" placeholder="Password" autocomplete="current-password" required>
                     <button type="button" class="password-toggle" id="toggle-admin-password" aria-label="Show password">
-                        <i class="fas fa-eye"></i>
+                        <i class="fas fa-eye-slash"></i>
                     </button>
                 </div>
 
@@ -117,8 +143,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const isHidden = adminPasswordInput.type === 'password';
                 adminPasswordInput.type = isHidden ? 'text' : 'password';
                 toggleAdminPassword.innerHTML = isHidden
-                    ? '<i class="fas fa-eye-slash"></i>'
-                    : '<i class="fas fa-eye"></i>';
+                    ? '<i class="fas fa-eye"></i>'
+                    : '<i class="fas fa-eye-slash"></i>';
                 toggleAdminPassword.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
             });
         }

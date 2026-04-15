@@ -70,19 +70,19 @@ if (isset($_GET['updated'])) {
     $messageType = 'success';
 }
 
-$stmt = $conn->prepare('SELECT id, medicine_name, dosage, quantity, expiry_date, category FROM medicines WHERE user_email = ? ORDER BY expiry_date ASC');
-$stmt->bind_param('s', $email);
-$stmt->execute();
-$result = $stmt->get_result();
-$medicines = $result->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
+$medicines = $conn->query(
+    'SELECT m.id, m.user_email, m.medicine_name, m.dosage, m.quantity, m.expiry_date, m.category, u.name AS owner_name
+     FROM medicines m
+     LEFT JOIN users u ON m.user_email = u.email
+     ORDER BY m.expiry_date ASC, m.id DESC'
+)->fetch_all(MYSQLI_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Medicines - Medicine Expiry Tracker</title>
+    <title>My Medicines-medztrack</title>
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -97,6 +97,7 @@ $stmt->close();
                 <a href="add_medicine.php" class="nav-item"><i class="fas fa-plus-circle"></i> Add Medicine</a>
                 <a href="my_medicines.php" class="nav-item active"><i class="fas fa-list"></i> My Medicines</a>
                 <a href="alerts.php" class="nav-item"><i class="fas fa-bell"></i> Alerts</a>
+                <a href="user_reports.php" class="nav-item"><i class="fas fa-file-lines"></i> Reports</a>
                 <a href="profile.php" class="nav-item"><i class="fas fa-user"></i> Profile</a>
             </nav>
             <form action="logout.php" method="post">
@@ -133,16 +134,21 @@ $stmt->close();
                         <?php foreach ($medicines as $medicine): ?>
                             <article class="medicine-card">
                                 <h3><?= htmlspecialchars($medicine['medicine_name']) ?></h3>
+                                <p><strong>Added by:</strong> <?= htmlspecialchars((string) (($medicine['owner_name'] ?? '') !== '' ? $medicine['owner_name'] : ($medicine['user_email'] ?? ''))) ?></p>
                                 <p><strong>Category:</strong> <?= htmlspecialchars($medicine['category'] !== '' ? $medicine['category'] : 'Other') ?></p>
                                 <p><strong>Dosage:</strong> <?= htmlspecialchars($medicine['dosage'] !== '' ? $medicine['dosage'] : 'Not set') ?></p>
                                 <p><strong>Quantity:</strong> <?= (int) $medicine['quantity'] ?></p>
                                 <p><strong>Expiry Date:</strong> <?= htmlspecialchars($medicine['expiry_date']) ?></p>
                                 <div class="card-buttons">
-                                  <a href="edit_medicine.php?id=<?= (int) $medicine['id'] ?>" class="add-btn edit-link" style="text-align:center;"><i class="fas fa-edit"></i> Edit</a>
-                                    <form method="post" action="" class="inline-form">
-                                        <input type="hidden" name="delete_medicine_id" value="<?= (int) $medicine['id'] ?>">
-                                        <button type="submit" class="delete-btn"><i class="fas fa-trash"></i> Delete</button>
-                                    </form>
+                                    <?php if ((string) ($medicine['user_email'] ?? '') === $email): ?>
+                                        <a href="edit_medicine.php?id=<?= (int) $medicine['id'] ?>" class="add-btn edit-link" style="text-align:center;"><i class="fas fa-edit"></i> Edit</a>
+                                        <form method="post" action="" class="inline-form">
+                                            <input type="hidden" name="delete_medicine_id" value="<?= (int) $medicine['id'] ?>">
+                                            <button type="submit" class="delete-btn"><i class="fas fa-trash"></i> Delete</button>
+                                        </form>
+                                    <?php else: ?>
+                                        <span class="setting-note">View only</span>
+                                    <?php endif; ?>
                                 </div>
                             </article>
                         <?php endforeach; ?>

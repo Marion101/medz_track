@@ -22,40 +22,37 @@ function isStrongPassword(string $password): bool
 {
     return strlen($password) >= 8
         && preg_match('/[A-Z]/', $password)
-        && preg_match('/[a-z]/', $password)
-        && preg_match('/[0-9]/', $password)
-        && preg_match('/[^A-Za-z0-9]/', $password);
+        && preg_match('/[a-z]/', $password);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim((string) ($_POST['name'] ?? ''));
-    $phone = normalize_phone((string) ($_POST['phone'] ?? ''));
-    $email = trim((string) ($_POST['email'] ?? ''));
+    $email = strtolower(trim((string) ($_POST['email'] ?? '')));
     $password = (string) ($_POST['password'] ?? '');
     $confirmPassword = (string) ($_POST['confirm_password'] ?? '');
 
-    if ($name === '' || $phone === '' || $email === '' || $password === '' || $confirmPassword === '') {
+    if ($name === '' || $email === '' || $password === '' || $confirmPassword === '') {
         $error = 'Please fill in all fields.';
-    } elseif (!preg_match('/^\+?[0-9]{10,15}$/', $phone)) {
-        $error = 'Enter a valid phone number with 10 to 15 digits.';
+    } elseif (preg_match('/\d/', $name)) {
+        $error = 'Full name cannot contain numbers.';
     } elseif ($password !== $confirmPassword) {
         $error = 'Passwords do not match.';
     } elseif (!isStrongPassword($password)) {
-        $error = 'Password must be at least 8 characters and include uppercase, lowercase, a number, and a symbol.';
+        $error = 'Password must be at least 8 characters and include both uppercase and lowercase letters.';
     } else {
-        $check = $conn->prepare('SELECT id FROM users WHERE email = ? OR phone = ?');
-        $check->bind_param('ss', $email, $phone);
+        $check = $conn->prepare('SELECT id FROM users WHERE email = ?');
+        $check->bind_param('s', $email);
         $check->execute();
         $exists = $check->get_result()->fetch_assoc();
         $check->close();
 
         if ($exists) {
-            $error = 'That email or phone number is already registered.';
+            $error = 'That email is already registered.';
         } else {
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
             $themePreference = 'light';
-            $stmt = $conn->prepare('INSERT INTO users (name, phone, email, password, theme_preference) VALUES (?, ?, ?, ?, ?)');
-            $stmt->bind_param('sssss', $name, $phone, $email, $hashedPassword, $themePreference);
+            $stmt = $conn->prepare('INSERT INTO users (name, email, password, theme_preference) VALUES (?, ?, ?, ?)');
+            $stmt->bind_param('ssss', $name, $email, $hashedPassword, $themePreference);
 
             if ($stmt->execute()) {
                 $_SESSION['user_email'] = $email;
@@ -78,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - Medicine Expiry Tracker</title>
+    <title>Sign Up-medztrack</title>
     <link rel="stylesheet" href="Login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -103,24 +100,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="input-group">
-                    <i class="fas fa-phone"></i>
-                    <input type="tel" id="signup-phone" name="phone" placeholder="Phone number" autocomplete="tel" inputmode="tel" required>
-                </div>
-
-                <div class="input-group">
                     <i class="fas fa-envelope"></i>
                     <input type="email" id="signup-email" name="email" placeholder="Email address" autocomplete="email" autocapitalize="none" spellcheck="false" required>
                 </div>
 
-                <div class="input-group">
+                <div class="input-group password-group">
                     <i class="fas fa-lock"></i>
-                    <input type="password" id="signup-password" name="password" placeholder="Password" autocomplete="new-password" minlength="8" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}" title="Use at least 8 characters with uppercase, lowercase, a number, and a symbol." required>
+                    <input type="password" id="signup-password" name="password" placeholder="Password" autocomplete="new-password" minlength="8" pattern="(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Use at least 8 characters with both uppercase and lowercase letters." required>
+                    <button type="button" class="password-toggle" id="toggle-signup-password" aria-label="Show password">
+                        <i class="fas fa-eye-slash"></i>
+                    </button>
                 </div>
-                <p class="password-help">Use 8+ characters with uppercase, lowercase, a number, and a symbol.</p>
+                <p class="password-help">Use at least 8 characters with both uppercase and lowercase letters.</p>
 
-                <div class="input-group">
+                <div class="input-group password-group">
                     <i class="fas fa-lock"></i>
                     <input type="password" id="signup-confirm-password" name="confirm_password" placeholder="Confirm Password" autocomplete="new-password" minlength="8" required>
+                    <button type="button" class="password-toggle" id="toggle-signup-confirm-password" aria-label="Show confirm password">
+                        <i class="fas fa-eye-slash"></i>
+                    </button>
                 </div>
 
                 <div class="remember-forgot">
@@ -137,5 +135,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </div>
     </div>
+    <script>
+        const signupPasswordInput = document.getElementById('signup-password');
+        const toggleSignupPassword = document.getElementById('toggle-signup-password');
+        const signupConfirmPasswordInput = document.getElementById('signup-confirm-password');
+        const toggleSignupConfirmPassword = document.getElementById('toggle-signup-confirm-password');
+
+        if (signupPasswordInput && toggleSignupPassword) {
+            toggleSignupPassword.addEventListener('click', () => {
+                const isHidden = signupPasswordInput.type === 'password';
+                signupPasswordInput.type = isHidden ? 'text' : 'password';
+                toggleSignupPassword.innerHTML = isHidden
+                    ? '<i class="fas fa-eye"></i>'
+                    : '<i class="fas fa-eye-slash"></i>';
+                toggleSignupPassword.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+            });
+        }
+
+        if (signupConfirmPasswordInput && toggleSignupConfirmPassword) {
+            toggleSignupConfirmPassword.addEventListener('click', () => {
+                const isHidden = signupConfirmPasswordInput.type === 'password';
+                signupConfirmPasswordInput.type = isHidden ? 'text' : 'password';
+                toggleSignupConfirmPassword.innerHTML = isHidden
+                    ? '<i class="fas fa-eye"></i>'
+                    : '<i class="fas fa-eye-slash"></i>';
+                toggleSignupConfirmPassword.setAttribute('aria-label', isHidden ? 'Hide confirm password' : 'Show confirm password');
+            });
+        }
+    </script>
 </body>
 </html>

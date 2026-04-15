@@ -13,6 +13,98 @@ function ensure_user_table(mysqli $conn): void
     $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(64) DEFAULT NULL AFTER reset_phone_otp_expires_at");
     $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS token_expiry DATETIME DEFAULT NULL AFTER reset_token");
     $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS theme_preference VARCHAR(10) NOT NULL DEFAULT 'light' AFTER token_expiry");
+    $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS failed_login_attempts INT NOT NULL DEFAULT 0 AFTER theme_preference");
+    $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS locked_until DATETIME DEFAULT NULL AFTER failed_login_attempts");
+}
+
+function login_max_attempts(): int
+{
+    return 5;
+}
+
+function login_lock_minutes(): int
+{
+    return 15;
+}
+
+function is_login_locked(?string $lockedUntil): bool
+{
+    if ($lockedUntil === null || trim($lockedUntil) === '') {
+        return false;
+    }
+
+    $lockTime = strtotime($lockedUntil);
+    if ($lockTime === false) {
+        return false;
+    }
+
+    return $lockTime > time();
+}
+
+function login_lock_seconds_remaining(?string $lockedUntil): int
+{
+    if (!is_login_locked($lockedUntil)) {
+        return 0;
+    }
+
+    $lockTime = strtotime((string) $lockedUntil);
+    if ($lockTime === false) {
+        return 0;
+    }
+
+    return max(0, $lockTime - time());
+}
+
+function login_lock_message(?string $lockedUntil): string
+{
+    $seconds = login_lock_seconds_remaining($lockedUntil);
+    if ($seconds <= 0) {
+        return 'Too many failed attempts. Please try again later.';
+    }
+
+    $minutes = (int) ceil($seconds / 60);
+    return 'Too many failed attempts. Try again in ' . $minutes . ' minute' . ($minutes === 1 ? '' : 's') . '.';
+}
+
+function clear_login_failures(mysqli $conn, string $email): void
+{
+    $stmt = $conn->prepare('UPDATE users SET failed_login_attempts = 0, locked_until = NULL WHERE email = ?');
+    $stmt->bind_param('s', $email);
+    $stmt->execute();
+    $stmt->close();
+}
+
+function record_login_failure(mysqli $conn, string $email): void
+{
+    $stmt = $conn->prepare('SELECT failed_login_attempts, locked_until FROM users WHERE email = ? LIMIT 1');
+    $stmt->bind_param('s', $email);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc() ?: [];
+    $stmt->close();
+
+    if ($row === []) {
+        return;
+    }
+
+    $lockedUntil = isset($row['locked_until']) ? (string) $row['locked_until'] : null;
+    if (is_login_locked($lockedUntil)) {
+        return;
+    }
+
+    $attempts = (int) ($row['failed_login_attempts'] ?? 0) + 1;
+    if ($attempts >= login_max_attempts()) {
+        $newLockedUntil = (new DateTimeImmutable('+' . login_lock_minutes() . ' minutes'))->format('Y-m-d H:i:s');
+        $update = $conn->prepare('UPDATE users SET failed_login_attempts = ?, locked_until = ? WHERE email = ?');
+        $update->bind_param('iss', $attempts, $newLockedUntil, $email);
+        $update->execute();
+        $update->close();
+        return;
+    }
+
+    $update = $conn->prepare('UPDATE users SET failed_login_attempts = ? WHERE email = ?');
+    $update->bind_param('is', $attempts, $email);
+    $update->execute();
+    $update->close();
 }
 
 function ensure_activity_log_table(mysqli $conn): void
@@ -225,6 +317,33 @@ function normalize_phone(string $phone): string
 {
     $phone = trim($phone);
     return preg_replace('/[^0-9+]/', '', $phone) ?? '';
+}
+
+function password_matches_or_legacy(string $plainPassword, string $storedPassword): bool
+{
+    if ($storedPassword === '') {
+        return false;
+    }
+
+    if (password_verify($plainPassword, $storedPassword)) {
+        return true;
+    }
+
+    return hash_equals($storedPassword, $plainPassword);
+}
+
+function upgrade_password_hash_if_legacy(mysqli $conn, string $email, string $plainPassword, string $storedPassword): void
+{
+    $needsUpgrade = password_get_info($storedPassword)['algo'] === null;
+    if (!$needsUpgrade) {
+        return;
+    }
+
+    $newHash = password_hash($plainPassword, PASSWORD_DEFAULT);
+    $stmt = $conn->prepare('UPDATE users SET password = ? WHERE email = ?');
+    $stmt->bind_param('ss', $newHash, $email);
+    $stmt->execute();
+    $stmt->close();
 }
 
 function normalize_theme_preference(string $theme): string

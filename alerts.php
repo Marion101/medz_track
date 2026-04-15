@@ -30,12 +30,12 @@ $conn->query(
     )"
 );
 
-$stmt = $conn->prepare('SELECT medicine_name, dosage, quantity, expiry_date FROM medicines WHERE user_email = ? ORDER BY expiry_date ASC');
-$stmt->bind_param('s', $email);
-$stmt->execute();
-$result = $stmt->get_result();
-$medicines = $result->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
+$medicines = $conn->query(
+    'SELECT m.medicine_name, m.dosage, m.quantity, m.expiry_date, m.user_email, u.name AS owner_name
+     FROM medicines m
+     LEFT JOIN users u ON m.user_email = u.email
+     ORDER BY m.expiry_date ASC, m.id DESC'
+)->fetch_all(MYSQLI_ASSOC);
 
 $today = new DateTimeImmutable('today');
 $alerts = [];
@@ -48,13 +48,13 @@ foreach ($medicines as $medicine) {
         $alerts[] = [
             'type' => 'Expired',
             'class' => 'expired',
-            'message' => $medicine['medicine_name'] . ' expired on ' . $medicine['expiry_date'] . '.',
+            'message' => $medicine['medicine_name'] . ' (added by ' . (($medicine['owner_name'] ?? '') !== '' ? $medicine['owner_name'] : $medicine['user_email']) . ') expired on ' . $medicine['expiry_date'] . '.',
         ];
     } elseif ($daysLeft <= 30) {
         $alerts[] = [
             'type' => 'Expiring Soon',
             'class' => 'warning',
-            'message' => $medicine['medicine_name'] . ' expires in ' . $daysLeft . ' day(s).',
+            'message' => $medicine['medicine_name'] . ' (added by ' . (($medicine['owner_name'] ?? '') !== '' ? $medicine['owner_name'] : $medicine['user_email']) . ') expires in ' . $daysLeft . ' day(s).',
         ];
     }
 
@@ -62,7 +62,7 @@ foreach ($medicines as $medicine) {
         $alerts[] = [
             'type' => 'Low Stock',
             'class' => 'low-stock',
-            'message' => $medicine['medicine_name'] . ' is running low with only ' . (int) $medicine['quantity'] . ' left.',
+            'message' => $medicine['medicine_name'] . ' (added by ' . (($medicine['owner_name'] ?? '') !== '' ? $medicine['owner_name'] : $medicine['user_email']) . ') is running low with only ' . (int) $medicine['quantity'] . ' left.',
         ];
     }
 }
@@ -72,7 +72,7 @@ foreach ($medicines as $medicine) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alerts - Medicine Expiry Tracker</title>
+    <title>Alerts-medztrack</title>
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -87,6 +87,7 @@ foreach ($medicines as $medicine) {
                 <a href="add_medicine.php" class="nav-item"><i class="fas fa-plus-circle"></i> Add Medicine</a>
                 <a href="my_medicines.php" class="nav-item"><i class="fas fa-list"></i> My Medicines</a>
                 <a href="alerts.php" class="nav-item active"><i class="fas fa-bell"></i> Alerts</a>
+                <a href="user_reports.php" class="nav-item"><i class="fas fa-file-lines"></i> Reports</a>
                 <a href="profile.php" class="nav-item"><i class="fas fa-user"></i> Profile</a>
             </nav>
             <form action="logout.php" method="post">

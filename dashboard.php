@@ -47,16 +47,17 @@ if ($displayName === '') {
     $displayName = $email;
 }
 
-$stmt = $conn->prepare('SELECT medicine_name, dosage, quantity, expiry_date, category FROM medicines WHERE user_email = ? ORDER BY expiry_date ASC');
-$stmt->bind_param('s', $email);
-$stmt->execute();
-$result = $stmt->get_result();
-$medicines = $result->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
+$medicines = $conn->query(
+    'SELECT m.expiry_date
+     FROM medicines m
+     ORDER BY m.expiry_date ASC, m.id DESC'
+)->fetch_all(MYSQLI_ASSOC);
 
 $totalMedicines = count($medicines);
 $expiringSoon = 0;
 $expired = 0;
+$lowStock = (int) ($conn->query('SELECT COUNT(*) AS total FROM medicines WHERE quantity <= 5')->fetch_assoc()['total'] ?? 0);
+$addedToday = (int) ($conn->query('SELECT COUNT(*) AS total FROM medicines WHERE DATE(created_at) = CURDATE()')->fetch_assoc()['total'] ?? 0);
 $today = new DateTimeImmutable('today');
 
 foreach ($medicines as $medicine) {
@@ -76,7 +77,7 @@ foreach ($medicines as $medicine) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Medicine Expiry Tracker</title>
+    <title>Dashboard-medztrack</title>
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -91,6 +92,7 @@ foreach ($medicines as $medicine) {
                 <a href="add_medicine.php" class="nav-item"><i class="fas fa-plus-circle"></i> Add Medicine</a>
                 <a href="my_medicines.php" class="nav-item"><i class="fas fa-list"></i> My Medicines</a>
                 <a href="alerts.php" class="nav-item"><i class="fas fa-bell"></i> Alerts</a>
+                <a href="user_reports.php" class="nav-item"><i class="fas fa-file-lines"></i> Reports</a>
                 <a href="profile.php" class="nav-item"><i class="fas fa-user"></i> Profile</a>
             </nav>
             <form action="logout.php" method="post">
@@ -100,10 +102,10 @@ foreach ($medicines as $medicine) {
 
         <main class="main-content">
             <header class="top-header">
-                <h2>Welcome back, <span id="username"><?= htmlspecialchars($displayName) ?></span>!</h2>
+        <h2>Hey, <span id="username"><?= htmlspecialchars($displayName) ?></span>!</h2>
                 <div class="header-actions">
                     <a href="add_medicine.php" class="add-btn"><i class="fas fa-plus"></i> Add Medicine</a>
-                   <a href="export.php" class="export-btn"><i class="fas fa-download"></i> Export</a>
+                   <a href="user_reports.php" class="export-btn"><i class="fas fa-file-lines"></i> Reports</a>
                 </div>
             </header>
 
@@ -153,25 +155,31 @@ foreach ($medicines as $medicine) {
 
             </section>
 
-            <section class="medicines-section">
-                <h3>Your Medicines</h3>
-                <div class="medicines-list" id="medicines-list">
-                    <?php if ($medicines === []): ?>
-                        <div class="empty-state">
-                            <i class="fas fa-inbox"></i>
-                            <p>No medicines added yet. Click "Add Medicine" to get started!</p>
+            <section class="medicines-section" style="margin-top: 10px;">
+                <h3>Quick Report</h3>
+                <p class="setting-note" style="margin-bottom: 14px;">Simple summary for today.</p>
+                <div class="stats-section">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #c9f4de;">
+                            <i class="fas fa-calendar-day"></i>
                         </div>
-                    <?php else: ?>
-                        <?php foreach ($medicines as $medicine): ?>
-                            <article class="medicine-card">
-                                <h3><?= htmlspecialchars($medicine['medicine_name']) ?></h3>
-                                <p><strong>Category:</strong> <?= htmlspecialchars($medicine['category'] !== '' ? $medicine['category'] : 'Other') ?></p>
-                                <p><strong>Dosage:</strong> <?= htmlspecialchars($medicine['dosage'] !== '' ? $medicine['dosage'] : 'Not set') ?></p>
-                                <p><strong>Quantity:</strong> <?= (int) $medicine['quantity'] ?></p>
-                                <p><strong>Expiry Date:</strong> <?= htmlspecialchars($medicine['expiry_date']) ?></p>
-                            </article>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+                        <div class="stat-info">
+                            <p class="stat-label">Added Today</p>
+                            <p class="stat-value"><?= $addedToday ?></p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #8ec5ff;">
+                            <i class="fas fa-box-open"></i>
+                        </div>
+                        <div class="stat-info">
+                            <p class="stat-label">Low Stock</p>
+                            <p class="stat-value"><?= $lowStock ?></p>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 12px;">
+                    <a href="user_reports.php" class="add-btn"><i class="fas fa-eye"></i> Open Full Report</a>
                 </div>
             </section>
         </main>

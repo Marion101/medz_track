@@ -172,7 +172,7 @@ $logs = $conn->query('SELECT user_email, action, details, created_at FROM activi
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Medz track</title>
+    <title>Admin-medztrack</title>
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -188,6 +188,7 @@ $logs = $conn->query('SELECT user_email, action, details, created_at FROM activi
                 <a href="admin_users.php" class="nav-item"><i class="fas fa-users"></i> Users & Roles</a>
                 <a href="admin_medicines.php" class="nav-item"><i class="fas fa-pills"></i> Medicines</a>
                 <a href="admin_logs.php" class="nav-item"><i class="fas fa-clipboard-list"></i> Activity Logs</a>
+                <a href="admin_reports.php" class="nav-item"><i class="fas fa-file-lines"></i> Reports</a>
             </nav>
             <form action="logout.php" method="post">
                 <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>

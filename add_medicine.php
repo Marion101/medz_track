@@ -20,11 +20,13 @@ $email = $_SESSION['user_email'];
 $message = null;
 $messageType = 'error';
 $categoryOptions = ['Pain Relief', 'Cold & Flu', 'Vitamins', 'Digestive', 'Other'];
+$todayDate = (new DateTimeImmutable('today'))->format('Y-m-d');
 
 $conn->query(
     "CREATE TABLE IF NOT EXISTS medicines (
         id INT AUTO_INCREMENT PRIMARY KEY,
         user_email VARCHAR(255) NOT NULL,
+        added_by_email VARCHAR(255) DEFAULT NULL,
         medicine_name VARCHAR(255) NOT NULL,
         dosage VARCHAR(100) DEFAULT '',
         quantity INT NOT NULL,
@@ -34,6 +36,8 @@ $conn->query(
     )"
 );
 $conn->query("ALTER TABLE medicines ADD COLUMN IF NOT EXISTS category VARCHAR(100) DEFAULT 'Other' AFTER expiry_date");
+$conn->query("ALTER TABLE medicines ADD COLUMN IF NOT EXISTS added_by_email VARCHAR(255) DEFAULT NULL AFTER user_email");
+$conn->query("UPDATE medicines SET added_by_email = user_email WHERE added_by_email IS NULL OR added_by_email = ''");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $medicineName = trim((string) ($_POST['medicine_name'] ?? ''));
@@ -46,11 +50,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $category = 'Other';
     }
 
+    $parsedExpiry = DateTimeImmutable::createFromFormat('Y-m-d', $expiryDate);
+    $isValidExpiry = $parsedExpiry !== false && $parsedExpiry->format('Y-m-d') === $expiryDate;
+
     if ($medicineName === '' || $quantity <= 0 || $expiryDate === '') {
         $message = 'Medicine name, quantity, and expiry date are required.';
+    } elseif (!$isValidExpiry) {
+        $message = 'Please enter a valid expiry date.';
+    } elseif ($expiryDate < $todayDate) {
+        $message = 'Expiry date cannot be in the past.';
     } else {
-        $stmt = $conn->prepare('INSERT INTO medicines (user_email, medicine_name, dosage, quantity, expiry_date, category) VALUES (?, ?, ?, ?, ?, ?)');
-        $stmt->bind_param('sssiss', $email, $medicineName, $dosage, $quantity, $expiryDate, $category);
+        $stmt = $conn->prepare('INSERT INTO medicines (user_email, added_by_email, medicine_name, dosage, quantity, expiry_date, category) VALUES (?, ?, ?, ?, ?, ?, ?)');
+        $stmt->bind_param('ssssiss', $email, $email, $medicineName, $dosage, $quantity, $expiryDate, $category);
 
         if ($stmt->execute()) {
             log_medicine_addition_alert($conn, $email, $email, $medicineName, $expiryDate);
@@ -70,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Medicine - Medicine Expiry Tracker</title>
+    <title>Add Medicine-medztrack</title>
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -85,6 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="add_medicine.php" class="nav-item active"><i class="fas fa-plus-circle"></i> Add Medicine</a>
                 <a href="my_medicines.php" class="nav-item"><i class="fas fa-list"></i> My Medicines</a>
                 <a href="alerts.php" class="nav-item"><i class="fas fa-bell"></i> Alerts</a>
+                <a href="user_reports.php" class="nav-item"><i class="fas fa-file-lines"></i> Reports</a>
                 <a href="profile.php" class="nav-item"><i class="fas fa-user"></i> Profile</a>
             </nav>
             <form action="logout.php" method="post">
@@ -134,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                     <div class="form-group">
                         <label for="expiry_date">Expiry Date *</label>
-                        <input type="date" id="expiry_date" name="expiry_date" required>
+                        <input type="date" id="expiry_date" name="expiry_date" min="<?= htmlspecialchars($todayDate) ?>" required>
                     </div>
                     <div class="form-group">
                         <label for="category">Category</label>

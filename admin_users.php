@@ -53,8 +53,71 @@ function dev_redirect(): void
     exit;
 }
 
+function admin_is_strong_password(string $password): bool
+{
+    return strlen($password) >= 8
+        && preg_match('/[A-Z]/', $password)
+        && preg_match('/[a-z]/', $password)
+        && preg_match('/[0-9]/', $password)
+        && preg_match('/[^A-Za-z0-9]/', $password);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = (string) ($_POST['action'] ?? '');
+
+    if ($action === 'create_user') {
+        $name = trim((string) ($_POST['name'] ?? ''));
+        $email = strtolower(trim((string) ($_POST['email'] ?? '')));
+        $role = (string) ($_POST['role'] ?? 'user');
+        $password = (string) ($_POST['password'] ?? '');
+
+        if ($name === '' || $email === '' || $password === '') {
+            dev_flash('error', 'Please fill all create-user fields.');
+            dev_redirect();
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            dev_flash('error', 'Enter a valid email address.');
+            dev_redirect();
+        }
+
+        if (!in_array($role, ['user', 'admin'], true)) {
+            dev_flash('error', 'Invalid role selected for new user.');
+            dev_redirect();
+        }
+
+        if (!admin_is_strong_password($password)) {
+            dev_flash('error', 'Password must be 8+ chars with uppercase, lowercase, number, and symbol.');
+            dev_redirect();
+        }
+
+        $existsStmt = $conn->prepare('SELECT id FROM users WHERE email = ? LIMIT 1');
+        $existsStmt->bind_param('s', $email);
+        $existsStmt->execute();
+        $exists = $existsStmt->get_result()->fetch_assoc() ?: [];
+        $existsStmt->close();
+
+        if ($exists !== []) {
+            dev_flash('error', 'A user with that email already exists.');
+            dev_redirect();
+        }
+
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+        $themePreference = 'light';
+        $createStmt = $conn->prepare('INSERT INTO users (name, email, password, role, theme_preference) VALUES (?, ?, ?, ?, ?)');
+        $createStmt->bind_param('sssss', $name, $email, $passwordHash, $role, $themePreference);
+        $created = $createStmt->execute();
+        $createStmt->close();
+
+        if (!$created) {
+            dev_flash('error', 'Could not create user. Please try again.');
+            dev_redirect();
+        }
+
+        log_activity($conn, $currentEmail, 'admin_user_created', $email . ' | role: ' . $role);
+        dev_flash('success', 'User created: ' . $email);
+        dev_redirect();
+    }
 
     if ($action === 'update_role') {
         $userId = (int) ($_POST['user_id'] ?? 0);
@@ -110,18 +173,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             dev_redirect();
         }
 
-        $medicineDelete = $conn->prepare('DELETE FROM medicines WHERE user_email = ?');
-        $medicineDelete->bind_param('s', $targetUser['email']);
-        $medicineDelete->execute();
-        $medicineDelete->close();
-
         $userDelete = $conn->prepare('DELETE FROM users WHERE id = ?');
         $userDelete->bind_param('i', $userId);
         $userDelete->execute();
         $userDelete->close();
 
-        log_activity($conn, $currentEmail, 'user_deleted', (string) $targetUser['email']);
-        dev_flash('success', 'User deleted.');
+        log_activity($conn, $currentEmail, 'user_deleted', (string) $targetUser['email'] . ' | medicines retained');
+        dev_flash('success', 'User deleted. Medicines were kept.');
         dev_redirect();
     }
 
@@ -228,7 +286,7 @@ $expiredCount = (int) ($conn->query('SELECT COUNT(*) AS total FROM medicines WHE
 $lowStockCount = (int) ($conn->query('SELECT COUNT(*) AS total FROM medicines WHERE quantity <= 5')->fetch_assoc()['total'] ?? 0);
 $adminCount = (int) ($conn->query("SELECT COUNT(*) AS total FROM users WHERE role = 'admin'")->fetch_assoc()['total'] ?? 0);
 
-$users = $conn->query('SELECT id, name, email, phone, role, created_at FROM users ORDER BY created_at DESC, id DESC LIMIT 25')->fetch_all(MYSQLI_ASSOC);
+$users = $conn->query('SELECT id, name, email, role, created_at FROM users ORDER BY created_at DESC, id DESC LIMIT 25')->fetch_all(MYSQLI_ASSOC);
 $medicines = $conn->query('SELECT id, user_email, medicine_name, category, quantity, expiry_date, created_at FROM medicines ORDER BY created_at DESC, id DESC LIMIT 25')->fetch_all(MYSQLI_ASSOC);
 $logs = $conn->query('SELECT user_email, action, details, created_at FROM activity_log ORDER BY created_at DESC, id DESC LIMIT 25')->fetch_all(MYSQLI_ASSOC);
 ?>
@@ -237,7 +295,7 @@ $logs = $conn->query('SELECT user_email, action, details, created_at FROM activi
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Users - Medz track</title>
+    <title>Admin Users-medztrack</title>
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -253,6 +311,7 @@ $logs = $conn->query('SELECT user_email, action, details, created_at FROM activi
                 <a href="admin_users.php" class="nav-item active"><i class="fas fa-users"></i> Users & Roles</a>
                 <a href="admin_medicines.php" class="nav-item"><i class="fas fa-pills"></i> Medicines</a>
                 <a href="admin_logs.php" class="nav-item"><i class="fas fa-clipboard-list"></i> Activity Logs</a>
+                <a href="admin_reports.php" class="nav-item"><i class="fas fa-file-lines"></i> Reports</a>
             </nav>
             <form action="logout.php" method="post">
                 <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
@@ -270,13 +329,23 @@ $logs = $conn->query('SELECT user_email, action, details, created_at FROM activi
 <section class="admin-section">
                 <div class="dev-panel" id="users">
                     <h3>Manage Users & Roles</h3>
+                    <form method="post" action="" class="dev-inline-form" style="margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+                        <input type="hidden" name="action" value="create_user">
+                        <input type="text" name="name" class="dev-select" placeholder="Full name" required>
+                        <input type="email" name="email" class="dev-select" placeholder="Email" required>
+                        <select name="role" class="dev-select">
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                        <input type="text" name="password" class="dev-select" placeholder="Temp password" minlength="8" required>
+                        <button type="submit" class="dev-btn">Create User</button>
+                    </form>
                     <div class="dev-table-wrap">
                         <table class="dev-table">
                             <thead>
                                 <tr>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th>Phone</th>
                                     <th>Role</th>
                                     <th>Joined</th>
                                     <th>Actions</th>
@@ -284,13 +353,12 @@ $logs = $conn->query('SELECT user_email, action, details, created_at FROM activi
                             </thead>
                             <tbody>
                                 <?php if ($users === []): ?>
-                                    <tr><td colspan="6" class="empty-cell">No users yet.</td></tr>
+                                    <tr><td colspan="5" class="empty-cell">No users yet.</td></tr>
                                 <?php else: ?>
                                     <?php foreach ($users as $row): ?>
                                         <tr>
                                             <td><?= htmlspecialchars((string) ($row['name'] ?? '')) ?></td>
                                             <td><?= htmlspecialchars((string) ($row['email'] ?? '')) ?></td>
-                                            <td><?= htmlspecialchars((string) ($row['phone'] ?? '')) ?></td>
                                             <td>
                                                 <span class="dev-pill"><?= htmlspecialchars((string) ($row['role'] ?? 'user')) ?></span>
                                             </td>
@@ -310,7 +378,7 @@ $logs = $conn->query('SELECT user_email, action, details, created_at FROM activi
                                                         <form method="post" action="" class="dev-inline-form">
                                                             <input type="hidden" name="action" value="delete_user">
                                                             <input type="hidden" name="user_id" value="<?= (int) $row['id'] ?>">
-                                                            <button type="submit" class="dev-btn dev-btn-danger" onclick="return confirm('Delete this user and their medicines?');">Delete</button>
+                                                            <button type="submit" class="dev-btn dev-btn-danger" onclick="return confirm('Delete this user account only? Medicines will be kept.');">Delete</button>
                                                         </form>
                                                         <form method="post" action="" class="dev-inline-form">
                                                             <input type="hidden" name="action" value="reset_demo_password">

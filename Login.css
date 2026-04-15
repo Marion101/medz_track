@@ -100,7 +100,7 @@ body {
     border-bottom-color: #DE8389;
 }
 
-.input-group i {
+.input-group > i {
     color: #DE8389;
     margin-right: 12px;
     font-size: 16px;
@@ -128,6 +128,12 @@ body {
     padding-right: 8px;
 }
 
+/* Hide browser-native password reveal/clear controls so only custom eye is shown */
+.password-group input::-ms-reveal,
+.password-group input::-ms-clear {
+    display: none;
+}
+
 .password-toggle {
     position: absolute;
     right: 0;
@@ -147,6 +153,9 @@ body {
 
 .password-toggle i {
     pointer-events: none;
+    margin: 0;
+    font-size: 16px;
+    line-height: 1;
 }
 
 .password-toggle:hover {
@@ -739,9 +748,28 @@ body.admin-login .signup-link {
 
 .auth-message.success,
 .message.success {
-    background: #e7f8ee;
-    color: #146a3d;
-    border-left-color: #2f9e56;
+    background: #ffeef3;
+    color: #b84f68;
+    border-left-color: #DE8389;
+    border: 1px solid #f2c2cf;
+}
+
+.auth-action-link {
+    display: block;
+    margin-top: 14px;
+    text-align: center;
+    color: #DE8389;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.auth-action-link:hover {
+    text-decoration: underline;
+}
+
+.auth-action-link:visited {
+    color: #DE8389;
 }
 
 .auth-message.warning,

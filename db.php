@@ -1,13 +1,22 @@
 <?php
 declare(strict_types=1);
 
-$isLocal = isset($_SERVER['HTTP_HOST']) && in_array($_SERVER['HTTP_HOST'], ['localhost', '127.0.0.1', 'localhost:80', '127.0.0.1:80'], true);
+$httpHost = (string) ($_SERVER['HTTP_HOST'] ?? '');
+$serverName = (string) ($_SERVER['SERVER_NAME'] ?? '');
+$remoteAddress = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+$hostOnly = strtolower(trim((string) preg_replace('/:\d+$/', '', $httpHost)));
+$knownLocalHosts = ['localhost', '127.0.0.1', '::1'];
+
+$isCli = PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg';
+$isLocalHost = in_array($hostOnly, $knownLocalHosts, true) || in_array(strtolower($serverName), $knownLocalHosts, true);
+$isLocalRemote = in_array($remoteAddress, ['127.0.0.1', '::1'], true);
+$isLocal = $isCli || $isLocalHost || $isLocalRemote;
 
 if ($isLocal) {
     $servername = 'localhost';
     $username = 'root';
     $password = '';
-    $dbname = 'login_system';
+    $dbname = 'medztrack';
 } else {
     $servername = 'sql308.infinityfree.com';
     $username = 'if0_41465460';

@@ -53,6 +53,21 @@ function dev_redirect(): void
     exit;
 }
 
+function bind_query_params(mysqli_stmt $stmt, string $types, array $params): void
+{
+    if ($types === '' || $params === []) {
+        return;
+    }
+
+    $refs = [];
+    foreach ($params as $index => $value) {
+        $refs[$index] = &$params[$index];
+    }
+
+    array_unshift($refs, $types);
+    $stmt->bind_param(...$refs);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = (string) ($_POST['action'] ?? '');
 
@@ -163,16 +178,63 @@ $expiredCount = (int) ($conn->query('SELECT COUNT(*) AS total FROM medicines WHE
 $lowStockCount = (int) ($conn->query('SELECT COUNT(*) AS total FROM medicines WHERE quantity <= 5')->fetch_assoc()['total'] ?? 0);
 $adminCount = (int) ($conn->query("SELECT COUNT(*) AS total FROM users WHERE role = 'admin'")->fetch_assoc()['total'] ?? 0);
 
-$users = $conn->query('SELECT id, name, email, phone, role, created_at FROM users ORDER BY created_at DESC, id DESC LIMIT 25')->fetch_all(MYSQLI_ASSOC);
-$medicines = $conn->query('SELECT id, user_email, medicine_name, category, quantity, expiry_date, created_at FROM medicines ORDER BY created_at DESC, id DESC LIMIT 25')->fetch_all(MYSQLI_ASSOC);
-$logs = $conn->query('SELECT user_email, action, details, created_at FROM activity_log ORDER BY created_at DESC, id DESC LIMIT 25')->fetch_all(MYSQLI_ASSOC);
+$logQ = trim((string) ($_GET['q'] ?? ''));
+$logAction = trim((string) ($_GET['action'] ?? ''));
+$dateFrom = trim((string) ($_GET['date_from'] ?? ''));
+$dateTo = trim((string) ($_GET['date_to'] ?? ''));
+
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateFrom)) {
+    $dateFrom = '';
+}
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateTo)) {
+    $dateTo = '';
+}
+
+$actionOptions = $conn->query('SELECT DISTINCT action FROM activity_log ORDER BY action ASC')->fetch_all(MYSQLI_ASSOC);
+
+$sql = 'SELECT user_email, action, details, created_at FROM activity_log WHERE 1=1';
+$types = '';
+$params = [];
+
+if ($logQ !== '') {
+    $sql .= ' AND (user_email LIKE ? OR details LIKE ?)';
+    $likeQ = '%' . $logQ . '%';
+    $types .= 'ss';
+    $params[] = $likeQ;
+    $params[] = $likeQ;
+}
+
+if ($logAction !== '') {
+    $sql .= ' AND action = ?';
+    $types .= 's';
+    $params[] = $logAction;
+}
+
+if ($dateFrom !== '') {
+    $sql .= " AND created_at >= CONCAT(?, ' 00:00:00')";
+    $types .= 's';
+    $params[] = $dateFrom;
+}
+
+if ($dateTo !== '') {
+    $sql .= " AND created_at <= CONCAT(?, ' 23:59:59')";
+    $types .= 's';
+    $params[] = $dateTo;
+}
+
+$sql .= ' ORDER BY created_at DESC, id DESC LIMIT 100';
+$logsStmt = $conn->prepare($sql);
+bind_query_params($logsStmt, $types, $params);
+$logsStmt->execute();
+$logs = $logsStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$logsStmt->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Logs - Medz track</title>
+    <title>Admin Logs-medztrack</title>
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -188,6 +250,7 @@ $logs = $conn->query('SELECT user_email, action, details, created_at FROM activi
                 <a href="admin_users.php" class="nav-item"><i class="fas fa-users"></i> Users & Roles</a>
                 <a href="admin_medicines.php" class="nav-item"><i class="fas fa-pills"></i> Medicines</a>
                 <a href="admin_logs.php" class="nav-item active"><i class="fas fa-clipboard-list"></i> Activity Logs</a>
+                <a href="admin_reports.php" class="nav-item"><i class="fas fa-file-lines"></i> Reports</a>
             </nav>
             <form action="logout.php" method="post">
                 <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
@@ -205,6 +268,22 @@ $logs = $conn->query('SELECT user_email, action, details, created_at FROM activi
             <section class="admin-section">
                 <div class="dev-panel" id="logs">
                     <h3>Activity Logs</h3>
+                    <form method="get" action="" class="dev-inline-form" style="margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+                        <input type="text" name="q" class="dev-select" placeholder="Search user/details" value="<?= htmlspecialchars($logQ) ?>">
+                        <select name="action" class="dev-select">
+                            <option value="">All actions</option>
+                            <?php foreach ($actionOptions as $option): ?>
+                                <?php $actionValue = (string) ($option['action'] ?? ''); ?>
+                                <option value="<?= htmlspecialchars($actionValue) ?>" <?= $logAction === $actionValue ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($actionValue) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <input type="date" name="date_from" class="dev-select" value="<?= htmlspecialchars($dateFrom) ?>">
+                        <input type="date" name="date_to" class="dev-select" value="<?= htmlspecialchars($dateTo) ?>">
+                        <button type="submit" class="dev-btn">Filter</button>
+                        <a href="admin_logs.php" class="dev-btn" style="text-decoration:none;">Clear</a>
+                    </form>
                     <div class="dev-table-wrap">
                         <table class="dev-table">
                             <thead>

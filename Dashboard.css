@@ -143,6 +143,11 @@ body {
 .header-actions .add-btn,
 .header-actions .export-btn {
     margin-bottom: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    line-height: 1;
 }
 
 .search-box {
@@ -403,6 +408,19 @@ body {
     transform: translateY(0);
 }
 
+.card-buttons .edit-link {
+    flex: 1;
+    margin: 0;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.2;
+}
+
 .use-btn {
     background: linear-gradient(135deg, #6bcf7f 0%, #9ee6b5 100%);
 }
@@ -655,7 +673,7 @@ body {
 
 .profile-info h3 {
     font-size: 28px;
-    color: #333;
+    color:#333;
     margin-bottom: 6px;
     line-height: 1.1;
 }
@@ -1197,6 +1215,10 @@ body.dark-theme .empty-cell {
     color: #b6c0cd;
 }
 
+body.dark-theme .medicine-card p strong {
+    color: #f0f5ff;
+}
+
 body.dark-theme .nav-item:hover {
     background: #232a34;
 }
@@ -1237,4 +1259,102 @@ body.dark-theme .dashboard-note {
 body.dark-theme .dashboard-note i,
 body.dark-theme .dashboard-note strong {
     color: #f4a2aa;
+}
+
+body.dark-theme .stat-value {
+    color: #f4a2aa;
+}
+
+body.dark-theme .stat-icon i {
+    color: #ffffff;
+}
+
+body.dark-theme .export-btn {
+    background: #1b222c;
+    color: #f4a2aa;
+    border: 1px solid #37414e;
+}
+
+body.dark-theme .export-btn:hover {
+    background: #242d38;
+}
+
+body.dark-theme .setting-note,
+body.dark-theme .dev-pill {
+    background: #2a1f25;
+    color: #ffb6c0;
+}
+
+body.dark-theme .btn-delete {
+    background: #2a1f25;
+    color: #ffb6c0;
+    border-color: #5b3d45;
+}
+
+body.dark-theme .empty-state i {
+    color: #f4a2aa;
+}
+
+body.dark-theme .nav-item.active {
+    background: linear-gradient(135deg, #ff8ea1 0%, #ffb8c6 100%);
+    color: #1a1115;
+}
+
+body.dark-theme .nav-item {
+    color: #d5deea;
+}
+
+body.dark-theme .back-btn,
+body.dark-theme a {
+    color: #ffb6c0;
+}
+
+body.dark-theme .add-btn,
+body.dark-theme .btn-submit,
+body.dark-theme .btn-edit,
+body.dark-theme .logout-btn,
+body.dark-theme .dev-btn {
+    background: linear-gradient(135deg, #ff8ea1 0%, #ffb8c6 100%);
+    color: #1a1115;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+body.dark-theme .delete-btn,
+body.dark-theme .dev-btn-danger {
+    background: linear-gradient(135deg, #ff7a84 0%, #ff9ca5 100%);
+    color: #210f12;
+}
+
+body.dark-theme .search-box::placeholder,
+body.dark-theme .form-group input::placeholder {
+    color: #9fb0c4;
+    opacity: 1;
+}
+
+body.dark-theme .auth-message.error,
+body.dark-theme .message.error {
+    background: #3a1e25;
+    color: #ffd2d8;
+    border-left-color: #ff7a84;
+}
+
+body.dark-theme .auth-message.success,
+body.dark-theme .message.success {
+    background: #1d3a2b;
+    color: #c9f7dc;
+    border-left-color: #58d68d;
+}
+
+body.dark-theme .auth-message.warning,
+body.dark-theme .message.warning {
+    background: #3c3120;
+    color: #ffe8b0;
+    border-left-color: #ffc85a;
+}
+
+body.dark-theme .auth-message.info,
+body.dark-theme .message.info {
+    background: #1d2f45;
+    color: #d7e9ff;
+    border-left-color: #76b7ff;
 }

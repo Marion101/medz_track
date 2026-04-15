@@ -20,6 +20,7 @@ $email = $_SESSION['user_email'];
 $message = null;
 $messageType = 'error';
 $categoryOptions = ['Pain Relief', 'Cold & Flu', 'Vitamins', 'Digestive', 'Analgesic', 'Antibiotic', 'Antacid', 'Antihistamine', 'Antifungal', 'Other'];
+$todayDate = (new DateTimeImmutable('today'))->format('Y-m-d');
 
 $id = (int) ($_GET['id'] ?? 0);
 if ($id <= 0) {
@@ -49,8 +50,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $category = 'Other';
     }
 
+    $parsedExpiry = DateTimeImmutable::createFromFormat('Y-m-d', $expiryDate);
+    $isValidExpiry = $parsedExpiry !== false && $parsedExpiry->format('Y-m-d') === $expiryDate;
+
     if ($medicineName === '' || $quantity <= 0 || $expiryDate === '') {
         $message = 'Medicine name, quantity, and expiry date are required.';
+        $messageType = 'error';
+    } elseif (!$isValidExpiry) {
+        $message = 'Please enter a valid expiry date.';
+        $messageType = 'error';
+    } elseif ($expiryDate < $todayDate) {
+        $message = 'Expiry date cannot be in the past.';
         $messageType = 'error';
     } else {
         $update = $conn->prepare('UPDATE medicines SET medicine_name = ?, dosage = ?, quantity = ?, expiry_date = ?, category = ? WHERE id = ? AND user_email = ?');
@@ -79,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Medicine - Medicine Expiry Tracker</title>
+    <title>Edit Medicine-medztrack</title>
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -94,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="add_medicine.php" class="nav-item"><i class="fas fa-plus-circle"></i> Add Medicine</a>
                 <a href="my_medicines.php" class="nav-item active"><i class="fas fa-list"></i> My Medicines</a>
                 <a href="alerts.php" class="nav-item"><i class="fas fa-bell"></i> Alerts</a>
+                <a href="user_reports.php" class="nav-item"><i class="fas fa-file-lines"></i> Reports</a>
                 <a href="profile.php" class="nav-item"><i class="fas fa-user"></i> Profile</a>
             </nav>
             <form action="logout.php" method="post">
@@ -139,7 +150,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="form-group">
                         <label for="expiry_date">Expiry Date *</label>
                         <input type="date" id="expiry_date" name="expiry_date"
-                               value="<?= htmlspecialchars((string) $medicine['expiry_date']) ?>" required>
+                               value="<?= htmlspecialchars((string) $medicine['expiry_date']) ?>"
+                               min="<?= htmlspecialchars($todayDate) ?>" required>
                     </div>
                     <div class="form-group">
                         <label for="category">Category</label>

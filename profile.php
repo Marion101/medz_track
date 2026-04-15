@@ -94,7 +94,7 @@ if (isset($_GET['theme_updated'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - Medicine Expiry Tracker</title>
+    <title>Profile-medztrack</title>
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -109,6 +109,7 @@ if (isset($_GET['theme_updated'])) {
                 <a href="add_medicine.php" class="nav-item"><i class="fas fa-plus-circle"></i> Add Medicine</a>
                 <a href="my_medicines.php" class="nav-item"><i class="fas fa-list"></i> My Medicines</a>
                 <a href="alerts.php" class="nav-item"><i class="fas fa-bell"></i> Alerts</a>
+                <a href="user_reports.php" class="nav-item"><i class="fas fa-file-lines"></i> Reports</a>
                 <a href="profile.php" class="nav-item active"><i class="fas fa-user"></i> Profile</a>
             </nav>
             <form action="logout.php" method="post">
@@ -161,17 +162,6 @@ if (isset($_GET['theme_updated'])) {
 
                 <div class="settings-card">
                     <h3>Account Settings</h3>
-                    
-                    <div class="setting-item">
-                        <div>
-                            <h4>Notifications</h4>
-                            <p>Get alerts for expiring medicines and low stock</p>
-                        </div>
-                        <label class="toggle">
-                            <input type="checkbox" checked disabled>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
 
                     <div class="setting-item">
                         <div>
@@ -185,17 +175,6 @@ if (isset($_GET['theme_updated'])) {
                                 <span class="slider"></span>
                             </label>
                         </form>
-                    </div>
-
-                    <div class="setting-item">
-                        <div>
-                            <h4>Auto Backup</h4>
-                            <p>Automatically backup your data</p>
-                        </div>
-                        <label class="toggle">
-                            <input type="checkbox" checked disabled>
-                            <span class="slider"></span>
-                        </label>
                     </div>
                 </div>
 

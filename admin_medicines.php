@@ -16,6 +16,7 @@ $conn->query(
     "CREATE TABLE IF NOT EXISTS medicines (
         id INT AUTO_INCREMENT PRIMARY KEY,
         user_email VARCHAR(255) NOT NULL,
+        added_by_email VARCHAR(255) DEFAULT NULL,
         medicine_name VARCHAR(255) NOT NULL,
         dosage VARCHAR(100) DEFAULT '',
         quantity INT NOT NULL,
@@ -25,6 +26,8 @@ $conn->query(
     )"
 );
 $conn->query("ALTER TABLE medicines ADD COLUMN IF NOT EXISTS category VARCHAR(100) DEFAULT 'Other' AFTER expiry_date");
+$conn->query("ALTER TABLE medicines ADD COLUMN IF NOT EXISTS added_by_email VARCHAR(255) DEFAULT NULL AFTER user_email");
+$conn->query("UPDATE medicines SET added_by_email = user_email WHERE added_by_email IS NULL OR added_by_email = ''");
 
 if (!isset($_SESSION['user_email'])) {
     header('Location: admin_login.php');
@@ -49,6 +52,7 @@ $displayName = trim((string) ($currentUser['name'] ?? ''));
 if ($displayName === '') {
     $displayName = $currentEmail;
 }
+$todayDate = (new DateTimeImmutable('today'))->format('Y-m-d');
 
 $flash = $_SESSION['dev_flash'] ?? null;
 unset($_SESSION['dev_flash']);
@@ -124,18 +128,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             dev_redirect();
         }
 
-        $medicineDelete = $conn->prepare('DELETE FROM medicines WHERE user_email = ?');
-        $medicineDelete->bind_param('s', $targetUser['email']);
-        $medicineDelete->execute();
-        $medicineDelete->close();
-
         $userDelete = $conn->prepare('DELETE FROM users WHERE id = ?');
         $userDelete->bind_param('i', $userId);
         $userDelete->execute();
         $userDelete->close();
 
-        log_activity($conn, $currentEmail, 'user_deleted', (string) $targetUser['email']);
-        dev_flash('success', 'User deleted.');
+        log_activity($conn, $currentEmail, 'user_deleted', (string) $targetUser['email'] . ' | medicines retained');
+        dev_flash('success', 'User deleted. Medicines were kept.');
         dev_redirect();
     }
 
@@ -183,8 +182,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $category = 'Other';
         }
 
+        $parsedExpiry = DateTimeImmutable::createFromFormat('Y-m-d', $expiryDate);
+        $isValidExpiry = $parsedExpiry !== false && $parsedExpiry->format('Y-m-d') === $expiryDate;
+
         if ($userEmail === '' || $medicineName === '' || $quantity <= 0 || $expiryDate === '') {
             dev_flash('error', 'User, medicine name, quantity, and expiry date are required.');
+            dev_redirect();
+        }
+
+        if (!$isValidExpiry) {
+            dev_flash('error', 'Please enter a valid expiry date.');
+            dev_redirect();
+        }
+
+        if ($expiryDate < $todayDate) {
+            dev_flash('error', 'Expiry date cannot be in the past.');
             dev_redirect();
         }
 
@@ -200,8 +212,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             dev_redirect();
         }
 
-        $stmt = $conn->prepare('INSERT INTO medicines (user_email, medicine_name, dosage, quantity, expiry_date, category) VALUES (?, ?, ?, ?, ?, ?)');
-        $stmt->bind_param('sssiss', $userEmail, $medicineName, $dosage, $quantity, $expiryDate, $category);
+        $stmt = $conn->prepare('INSERT INTO medicines (user_email, added_by_email, medicine_name, dosage, quantity, expiry_date, category) VALUES (?, ?, ?, ?, ?, ?, ?)');
+        $stmt->bind_param('ssssiss', $userEmail, $currentEmail, $medicineName, $dosage, $quantity, $expiryDate, $category);
 
         if ($stmt->execute()) {
             $stmt->close();
@@ -232,7 +244,7 @@ $allUsers = $conn->query('SELECT email, name FROM users ORDER BY name ASC, email
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Medicines - Medz track</title>
+    <title>Admin Medicines-medztrack</title>
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -248,6 +260,7 @@ $allUsers = $conn->query('SELECT email, name FROM users ORDER BY name ASC, email
                 <a href="admin_users.php" class="nav-item"><i class="fas fa-users"></i> Users & Roles</a>
                 <a href="admin_medicines.php" class="nav-item active"><i class="fas fa-pills"></i> Medicines</a>
                 <a href="admin_logs.php" class="nav-item"><i class="fas fa-clipboard-list"></i> Activity Logs</a>
+                <a href="admin_reports.php" class="nav-item"><i class="fas fa-file-lines"></i> Reports</a>
             </nav>
             <form action="logout.php" method="post">
                 <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
@@ -299,7 +312,7 @@ $allUsers = $conn->query('SELECT email, name FROM users ORDER BY name ASC, email
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="expiry_date">Expiry Date *</label>
-                                    <input type="date" id="expiry_date" name="expiry_date" required>
+                                    <input type="date" id="expiry_date" name="expiry_date" min="<?= htmlspecialchars($todayDate) ?>" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="category">Category</label>

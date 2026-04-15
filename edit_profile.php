@@ -34,23 +34,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'update_profile') {
         $name = trim((string) ($_POST['name'] ?? ''));
+        $newEmail = strtolower(trim((string) ($_POST['email'] ?? '')));
+        $currentPassword = (string) ($_POST['current_password'] ?? '');
+        $currentEmail = (string) ($user['email'] ?? $email);
+        $changingSensitive = ($newEmail !== strtolower($currentEmail));
 
-        if ($name === '') {
-            $message = 'Please enter a name.';
+        if ($name === '' || $newEmail === '') {
+            $message = 'Please fill in name and email.';
+        } elseif (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
+            $message = 'Enter a valid email address.';
+        } elseif ($changingSensitive && $currentPassword === '') {
+            $message = 'Enter your current password to change email.';
+        } elseif ($changingSensitive && !password_verify($currentPassword, (string) ($user['password'] ?? ''))) {
+            $message = 'Current password is incorrect.';
         } else {
-            $update = $conn->prepare('UPDATE users SET name = ? WHERE email = ?');
-            $update->bind_param('ss', $name, $email);
+            $existsStmt = $conn->prepare('SELECT id FROM users WHERE email = ? AND email <> ? LIMIT 1');
+            $existsStmt->bind_param('ss', $newEmail, $currentEmail);
+            $existsStmt->execute();
+            $exists = $existsStmt->get_result()->fetch_assoc() ?: [];
+            $existsStmt->close();
 
-            if ($update->execute()) {
-                log_activity($conn, $email, 'profile_update', 'Display name changed');
-                $messageType = 'success';
-                $message = 'Profile updated successfully.';
-                $user['name'] = $name;
+            if ($exists !== []) {
+                $message = 'Another account already uses that email.';
             } else {
-                $message = 'Could not update your profile. Please try again.';
-            }
+                $conn->begin_transaction();
+                try {
+                    $update = $conn->prepare('UPDATE users SET name = ?, email = ? WHERE email = ?');
+                    $update->bind_param('sss', $name, $newEmail, $currentEmail);
+                    $ok = $update->execute();
+                    $update->close();
 
-            $update->close();
+                    if (!$ok) {
+                        throw new RuntimeException('User update failed.');
+                    }
+
+                    if ($newEmail !== $currentEmail) {
+                        $medUpdate = $conn->prepare('UPDATE medicines SET user_email = ? WHERE user_email = ?');
+                        $medUpdate->bind_param('ss', $newEmail, $currentEmail);
+                        $medUpdate->execute();
+                        $medUpdate->close();
+                    }
+
+                    $conn->commit();
+                    $_SESSION['user_email'] = $newEmail;
+                    $_SESSION['user_name'] = $name;
+                    $email = $newEmail;
+                    $user['name'] = $name;
+                    $user['email'] = $newEmail;
+                    $messageType = 'success';
+                    $message = 'Profile updated successfully.';
+                    $details = 'Profile updated';
+                    if ($changingSensitive) {
+                        $details .= ' (email changed with password confirmation)';
+                    }
+                    log_activity($conn, $newEmail, 'profile_update', $details);
+                } catch (Throwable $e) {
+                    $conn->rollback();
+                    $message = 'Could not update your profile. Please try again.';
+                }
+            }
         }
     }
 
@@ -84,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $message = 'Password changed successfully.';
                 $user['password'] = $newPasswordHash;
             } else {
-                $message = 'Could not change password. Please try again.';
+                $message = 'Could not update your profile. Please try again.';
             }
 
             $updatePassword->close();
@@ -97,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Profile - Medicine Expiry Tracker</title>
+    <title>Edit Profile-medztrack</title>
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -112,6 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="add_medicine.php" class="nav-item"><i class="fas fa-plus-circle"></i> Add Medicine</a>
                 <a href="my_medicines.php" class="nav-item"><i class="fas fa-list"></i> My Medicines</a>
                 <a href="alerts.php" class="nav-item"><i class="fas fa-bell"></i> Alerts</a>
+                <a href="user_reports.php" class="nav-item"><i class="fas fa-file-lines"></i> Reports</a>
                 <a href="profile.php" class="nav-item active"><i class="fas fa-user"></i> Profile</a>
             </nav>
             <form action="logout.php" method="post">
@@ -141,8 +184,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <input type="text" id="name" name="name" value="<?= htmlspecialchars((string) ($user['name'] ?? '')) ?>" placeholder="Your name" required>
                     </div>
                     <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" value="<?= htmlspecialchars((string) ($user['email'] ?? $email)) ?>" disabled>
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" value="<?= htmlspecialchars((string) ($user['email'] ?? $email)) ?>" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="profile_current_password">Current Password (required for email changes)</label>
+                        <input type="password" id="profile_current_password" name="current_password" autocomplete="current-password">
                     </div>
                     <button type="submit" class="btn-submit">Save Changes</button>
                 </form>
