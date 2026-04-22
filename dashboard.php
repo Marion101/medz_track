@@ -92,7 +92,7 @@ foreach ($medicines as $medicine) {
                 <a href="add_medicine.php" class="nav-item"><i class="fas fa-plus-circle"></i> Add Medicine</a>
                 <a href="my_medicines.php" class="nav-item"><i class="fas fa-list"></i> My Medicines</a>
                 <a href="alerts.php" class="nav-item"><i class="fas fa-bell"></i> Alerts</a>
-                <a href="user_reports.php" class="nav-item"><i class="fas fa-file-lines"></i> Reports</a>
+                <a href="user_calendar.php" class="nav-item"><i class="fas fa-calendar-days"></i> Calendar</a>
                 <a href="profile.php" class="nav-item"><i class="fas fa-user"></i> Profile</a>
             </nav>
             <form action="logout.php" method="post">
@@ -105,7 +105,6 @@ foreach ($medicines as $medicine) {
         <h2>Hey, <span id="username"><?= htmlspecialchars($displayName) ?></span>!</h2>
                 <div class="header-actions">
                     <a href="add_medicine.php" class="add-btn"><i class="fas fa-plus"></i> Add Medicine</a>
-                   <a href="user_reports.php" class="export-btn"><i class="fas fa-file-lines"></i> Reports</a>
                 </div>
             </header>
 
@@ -177,9 +176,6 @@ foreach ($medicines as $medicine) {
                             <p class="stat-value"><?= $lowStock ?></p>
                         </div>
                     </div>
-                </div>
-                <div style="margin-top: 12px;">
-                    <a href="user_reports.php" class="add-btn"><i class="fas fa-eye"></i> Open Full Report</a>
                 </div>
             </section>
         </main>

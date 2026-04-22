@@ -17,6 +17,7 @@ if (!isset($_SESSION['user_email'])) {
 }
 
 $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS name VARCHAR(100) DEFAULT NULL AFTER id");
+$conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP AFTER role");
 $conn->query(
     "CREATE TABLE IF NOT EXISTS medicines (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -32,6 +33,21 @@ $conn->query(
 $email = $_SESSION['user_email'];
 $message = null;
 $messageType = 'success';
+
+$backfillJoinDate = $conn->prepare(
+    "UPDATE users u
+     LEFT JOIN (
+        SELECT user_email, MIN(created_at) AS first_medicine_at
+        FROM medicines
+        GROUP BY user_email
+     ) m ON m.user_email = u.email
+     SET u.created_at = COALESCE(m.first_medicine_at, NOW())
+     WHERE u.email = ?
+       AND (u.created_at IS NULL OR u.created_at = '0000-00-00 00:00:00' OR u.created_at < '1971-01-01 00:00:00')"
+);
+$backfillJoinDate->bind_param('s', $email);
+$backfillJoinDate->execute();
+$backfillJoinDate->close();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && (string) ($_POST['action'] ?? '') === 'update_theme') {
     $theme = isset($_POST['dark_mode']) ? 'dark' : 'light';
@@ -109,7 +125,7 @@ if (isset($_GET['theme_updated'])) {
                 <a href="add_medicine.php" class="nav-item"><i class="fas fa-plus-circle"></i> Add Medicine</a>
                 <a href="my_medicines.php" class="nav-item"><i class="fas fa-list"></i> My Medicines</a>
                 <a href="alerts.php" class="nav-item"><i class="fas fa-bell"></i> Alerts</a>
-                <a href="user_reports.php" class="nav-item"><i class="fas fa-file-lines"></i> Reports</a>
+                <a href="user_calendar.php" class="nav-item"><i class="fas fa-calendar-days"></i> Calendar</a>
                 <a href="profile.php" class="nav-item active"><i class="fas fa-user"></i> Profile</a>
             </nav>
             <form action="logout.php" method="post">

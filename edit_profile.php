@@ -154,7 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="add_medicine.php" class="nav-item"><i class="fas fa-plus-circle"></i> Add Medicine</a>
                 <a href="my_medicines.php" class="nav-item"><i class="fas fa-list"></i> My Medicines</a>
                 <a href="alerts.php" class="nav-item"><i class="fas fa-bell"></i> Alerts</a>
-                <a href="user_reports.php" class="nav-item"><i class="fas fa-file-lines"></i> Reports</a>
+                <a href="user_calendar.php" class="nav-item"><i class="fas fa-calendar-days"></i> Calendar</a>
                 <a href="profile.php" class="nav-item active"><i class="fas fa-user"></i> Profile</a>
             </nav>
             <form action="logout.php" method="post">

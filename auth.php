@@ -6,6 +6,7 @@ function ensure_user_table(mysqli $conn): void
     $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS name VARCHAR(100) DEFAULT NULL AFTER id");
     $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(20) DEFAULT NULL AFTER name");
     $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) NOT NULL DEFAULT 'user' AFTER phone");
+    $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP AFTER role");
     $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS remember_token_hash VARCHAR(64) DEFAULT NULL AFTER password");
     $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS remember_token_expires_at DATETIME DEFAULT NULL AFTER remember_token_hash");
     $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_phone_otp VARCHAR(10) DEFAULT NULL AFTER remember_token_expires_at");
