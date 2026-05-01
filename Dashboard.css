@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
-/* Global reset and page defaults */
+/* RESET */
 * {
     margin: 0;
     padding: 0;
@@ -18,12 +18,13 @@ body {
     color: #333;
 }
 
-/* Main dashboard shell and sidebar navigation */
+/* PAGE LAYOUT */
 .dashboard-container {
     display: flex;
     min-height: 100vh;
 }
 
+/* SIDEBAR */
 .sidebar {
     width: 260px;
     background: white;
@@ -35,6 +36,7 @@ body {
     z-index: 1000;
 }
 
+/* SIDEBAR TITLE */
 .sidebar-header h1 {
     color: #DE8389;
     font-size: 22px;
@@ -44,6 +46,7 @@ body {
     gap: 8px;
 }
 
+/* SIDEBAR MENU */
 .sidebar-nav {
     display: flex;
     flex-direction: column;
@@ -51,6 +54,7 @@ body {
     margin-bottom: 30px;
 }
 
+/* SIDEBAR LINK */
 .nav-item {
     padding: 12px 15px;
     text-decoration: none;
@@ -71,11 +75,13 @@ body {
     transform: translateX(2px);
 }
 
+/* ACTIVE SIDEBAR LINK */
 .nav-item.active {
     background: linear-gradient(135deg, #DE8389 0%, #F4C9D6 100%);
     color: white;
 }
 
+/* LOGOUT BUTTON */
 .logout-btn {
     display: block;
     width: 100%;
@@ -98,6 +104,7 @@ body {
     box-shadow: 0 6px 20px rgba(222, 131, 137, 0.4);
 }
 
+/* BACK BUTTON */
 .back-btn {
     display: flex;
     align-items: center;
@@ -118,6 +125,7 @@ body {
     transform: translateX(-3px);
 }
 
+/* MAIN CONTENT */
 .main-content {
     flex: 1;
     padding: 30px 40px;
@@ -126,7 +134,7 @@ body {
     z-index: 1;
 }
 
-/* Page header, search, and action buttons */
+/* PAGE HEADER */
 .top-header {
     display: flex;
     justify-content: space-between;
@@ -134,6 +142,7 @@ body {
     gap: 16px;
 }
 
+/* HEADER ACTIONS */
 .header-actions {
     display: flex;
     align-items: center;
@@ -151,6 +160,7 @@ body {
     line-height: 1;
 }
 
+/* SEARCH BOX */
 .search-box {
     padding: 10px 14px;
     border: 2px solid #f0e6e7;
@@ -159,6 +169,7 @@ body {
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
 }
 
+/* EXPORT BUTTON */
 .export-btn {
     padding: 10px 14px;
     border-radius: 10px;
@@ -173,10 +184,10 @@ body {
 
 .export-btn:hover { background: #fff0f2; }
 
-/* Tweak stat icons */
+/* STAT ICON COLOR */
 .stat-icon i { color: #8a5760; font-size: 18px; }
 
-/* Dashboard title, quote banner, and helper note */
+/* DASHBOARD INTRO */
 .top-header h2 {
     font-size: 28px;
     color: #333;
@@ -229,7 +240,7 @@ body {
     color: #c45d6b;
 }
 
-/* Dashboard statistic cards */
+/* STAT CARDS */
 .stats-section {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -245,6 +256,7 @@ body {
     border-left: none;
 }
 
+/* STAT ICON BOX */
 .stat-icon {
     width: 52px;
     height: 52px;
@@ -255,6 +267,7 @@ body {
     flex-shrink: 0;
 }
 
+/* STAT TEXT */
 .stat-info {
     min-width: 0;
 }
@@ -316,7 +329,7 @@ body {
     color: #DE8389;
 }
 
-/* Primary action buttons */
+/* MAIN BUTTON */
 .add-btn {
     background: linear-gradient(135deg, #DE8389 0%, #F4C9D6 100%);
     color: white;
@@ -338,7 +351,7 @@ body {
     box-shadow: 0 6px 20px rgba(222, 131, 137, 0.4);
 }
 
-/* Medicine card grid and card details */
+/* MEDICINE GRID */
 .medicines-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -352,6 +365,7 @@ body {
     scroll-margin-top: 24px;
 }
 
+/* MEDICINE CARD */
 .medicine-card {
     background: white;
     padding: 20px;
@@ -384,6 +398,7 @@ body {
     font-weight: 600;
 }
 
+/* CARD BUTTONS */
 .card-buttons {
     display: flex;
     gap: 10px;
@@ -425,15 +440,17 @@ body {
     line-height: 1.2;
 }
 
+/* USE BUTTON */
 .use-btn {
     background: linear-gradient(135deg, #6bcf7f 0%, #9ee6b5 100%);
 }
 
+/* DELETE BUTTON */
 .delete-btn {
     background: linear-gradient(135deg, #ff6b6b 0%, #ff9b9b 100%);
 }
 
-/* Empty state shown when no data is available */
+/* EMPTY STATE */
 .empty-state {
     padding: 40px;
     text-align: center;
@@ -448,7 +465,7 @@ body {
     margin-bottom: 10px;
 }
 
-/* Modal dialog layout and animation */
+/* POPUP BACKGROUND */
 .modal {
     display: none;
     position: fixed;
@@ -465,6 +482,7 @@ body {
     display: flex;
 }
 
+/* POPUP BOX */
 .modal-content {
     background: white;
     padding: 35px;
@@ -486,6 +504,7 @@ body {
     }
 }
 
+/* POPUP HEADER */
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -501,6 +520,7 @@ body {
 }
 
 
+/* CLOSE BUTTON */
 .close-btn {
     background: none;
     border: none;
@@ -514,7 +534,7 @@ body {
     color: #667eea;
 }
 
-/* Shared form fields and submit buttons */
+/* FORM FIELDS */
 .form-group {
     margin-bottom: 18px;
 }
@@ -545,6 +565,7 @@ body {
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
+/* FORM ROW */
 .form-row {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -557,6 +578,7 @@ body {
     gap: 15px;
 }
 
+/* SAVE BUTTON */
 .btn-submit {
     background: linear-gradient(135deg, #DE8389 0%, #F4C9D6 100%);
     color: white;
@@ -574,6 +596,7 @@ body {
     box-shadow: 0 6px 20px rgba(222, 131, 137, 0.4);
 }
 
+/* MEDICINE FORM */
 .medicine-form-panel {
     position: static;
     transform: none;
@@ -583,7 +606,7 @@ body {
     width: 100%;
 }
 
-/* Profile page layout, avatar, stats, and account actions */
+/* PROFILE PAGE */
 .profile-section {
     max-width: 900px;
     display: flex;
@@ -591,6 +614,7 @@ body {
     gap: 24px;
 }
 
+/* PROFILE CARD */
 .profile-card {
     background: white;
     padding: 35px;
@@ -602,6 +626,7 @@ body {
     align-items: center;
 }
 
+/* PROFILE PHOTO AREA */
 .profile-picture-container {
     text-align: center;
     position: relative;
@@ -628,6 +653,7 @@ body {
     z-index: 0;
 }
 
+/* PROFILE PHOTO */
 .profile-picture {
     width: 126px;
     height: 126px;
@@ -649,6 +675,7 @@ body {
     display: none;
 }
 
+/* PHOTO UPLOAD BUTTON */
 .picture-upload-btn {
     width: 42px;
     height: 42px;
@@ -672,6 +699,7 @@ body {
     box-shadow: 0 10px 24px rgba(222, 131, 137, 0.35);
 }
 
+/* PROFILE TEXT */
 .profile-info {
     min-width: 0;
 }
@@ -689,6 +717,7 @@ body {
     margin-bottom: 20px;
 }
 
+/* PROFILE STATS */
 .profile-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -724,12 +753,14 @@ body {
     flex-shrink: 0;
 }
 
+/* PROFILE BUTTONS */
 .profile-actions {
     display: flex;
     gap: 14px;
     margin-top: 8px;
 }
 
+/* EDIT / DELETE BUTTONS */
 .btn-edit,
 .btn-delete {
     display: inline-flex;
@@ -761,6 +792,7 @@ body {
     transform: translateY(-2px);
 }
 
+/* SETTINGS CARD */
 .settings-card {
     background: white;
     padding: 28px;
@@ -774,6 +806,7 @@ body {
     color: #333;
 }
 
+/* SETTING ROW */
 .setting-item {
     display: flex;
     align-items: center;
@@ -799,6 +832,7 @@ body {
     color: #8d7780;
 }
 
+/* NOTE LABEL */
 .setting-note {
     display: inline-flex;
     align-items: center;
@@ -812,6 +846,7 @@ body {
     white-space: nowrap;
 }
 
+/* THEME SWITCH */
 .toggle {
     position: relative;
     display: inline-block;
@@ -826,6 +861,7 @@ body {
     height: 0;
 }
 
+/* SWITCH TRACK */
 .slider {
     position: absolute;
     inset: 0;
@@ -856,7 +892,7 @@ body {
     transform: translateX(22px);
 }
 
-/* About/settings informational card */
+/* ABOUT CARD */
 .about-card {
     background: white;
     padding: 25px;
@@ -878,7 +914,7 @@ body {
     line-height: 1.6;
 }
 
-/* Mobile layout adjustments */
+/* MOBILE LAYOUT */
 @media (max-width: 768px) {
     .dashboard-container {
         flex-direction: column;
@@ -943,7 +979,7 @@ body {
     }
 }
 
-/* Alert and flash message states */
+/* MESSAGES */
 .auth-message,
 .message {
     margin: 0 0 14px;
@@ -983,7 +1019,7 @@ body {
     border-left-color: #3b82f6;
 }
 
-/* Admin section panels and data tables */
+/* ADMIN AREA */
 .admin-section {
     display: grid;
     grid-template-columns: 1fr;
@@ -991,6 +1027,7 @@ body {
     margin-top: 10px;
 }
 
+/* ADMIN PANEL */
 .dev-panel {
     background: white;
     border-radius: 12px;
@@ -1005,6 +1042,7 @@ body {
     font-size: 18px;
 }
 
+/* ADMIN FORM */
 .dev-form-section {
     margin-bottom: 24px;
     padding-bottom: 24px;
@@ -1017,10 +1055,12 @@ body {
     font-size: 16px;
 }
 
+/* TABLE WRAPPER */
 .dev-table-wrap {
     overflow-x: auto;
 }
 
+/* TABLE */
 .dev-table {
     width: 100%;
     border-collapse: collapse;
@@ -1046,6 +1086,7 @@ body {
     background: #fff8f9;
 }
 
+/* STATUS LABEL */
 .dev-pill {
     display: inline-flex;
     align-items: center;
@@ -1057,13 +1098,14 @@ body {
     font-weight: 600;
 }
 
+/* EMPTY TABLE */
 .empty-cell {
     text-align: center;
     color: #8d7780;
     padding: 20px 10px;
 }
 
-/* Admin inline controls and developer action buttons */
+/* ADMIN CONTROLS */
 .dev-actions {
     display: flex;
     flex-wrap: wrap;
@@ -1071,6 +1113,7 @@ body {
     align-items: center;
 }
 
+/* INLINE FORM */
 .dev-inline-form {
     display: flex;
     gap: 8px;
@@ -1078,6 +1121,7 @@ body {
     margin: 0;
 }
 
+/* SELECT INPUT */
 .dev-select {
     padding: 8px 10px;
     border: 1px solid #ead8db;
@@ -1088,6 +1132,7 @@ body {
     font-size: 13px;
 }
 
+/* ADMIN BUTTON */
 .dev-btn {
     padding: 9px 12px;
     border: none;
@@ -1103,15 +1148,17 @@ body {
     filter: brightness(0.96);
 }
 
+/* DANGER BUTTON */
 .dev-btn-danger {
     background: linear-gradient(135deg, #ff6b6b 0%, #ff9b9b 100%);
 }
 
+/* SUCCESS BUTTON */
 .dev-btn-success {
     background: linear-gradient(135deg, #6bcf7f 0%, #9ee6b5 100%);
 }
 
-/* Admin console color overrides */
+/* ADMIN COLORS */
 .admin-console .sidebar-header h1 {
     color: #5c1d2c;
 }
@@ -1174,7 +1221,7 @@ body {
     color: white;
 }
 
-/* Dark theme overrides */
+/* DARK MODE */
 body.dark-theme {
     background: linear-gradient(180deg, #12161c 0%, #0f1218 50%, #0b0e13 100%);
     color: #e8edf4;

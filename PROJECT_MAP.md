@@ -33,7 +33,6 @@ This file helps you quickly find where to edit features.
 
 ## Styling
 - `Dashboard.css`: main app styles
-- `style.css`: shared/base styles
 - `Login.css`: auth page styles
 
 ## Utility

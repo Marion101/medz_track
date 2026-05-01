@@ -180,7 +180,7 @@ $logs = $conn->query('SELECT user_email, action, details, created_at FROM activi
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin-medztrack</title>
-    <!-- Page styles -->
+    <!-- CSS for this page is in Dashboard.css -->
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>

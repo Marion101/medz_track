@@ -1,13 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
-/* Global reset */
+/* RESET */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
  
-/* Back arrow icon */
+/* BACK ARROW */
 #back-arrow {
     position: absolute;
     top: 20px;
@@ -19,7 +19,7 @@
     transition: all 0.3s ease;
 }
 
-/* Login/register page background and centered card shell */
+/* PAGE BACKGROUND */
 body {
     font-family: 'Poppins', sans-serif;
     background: linear-gradient(135deg, #DE8389 0%, #F4C9D6 100%);
@@ -30,6 +30,7 @@ body {
     color: #333;
 }
 
+/* LOGIN CARD */
 .container {
     width: 100%;
     max-width: 420px;
@@ -39,13 +40,14 @@ body {
     overflow: hidden;
 }
 
-/* Login/register tabs */
+/* TABS */
 .tabs {
     display: flex;
     background: #f8f9fa;
     border-bottom: 2px solid #eee;
 }
 
+/* TAB BUTTON */
 .tab {
     flex: 1;
     padding: 16px;
@@ -69,11 +71,12 @@ body {
     background: white;
 }
 
-/* Form panels and transitions */
+/* FORM AREA */
 .form-container {
     padding: 40px;
 }
 
+/* HIDDEN FORM */
 .form {
     opacity: 0;
     display: none;
@@ -81,6 +84,7 @@ body {
     transition: all 0.4s ease;
 }
 
+/* ACTIVE FORM */
 .form.active {
     opacity: 1;
     display: block;
@@ -93,6 +97,7 @@ body {
     font-size: 24px;
 }
 
+/* INPUT ROW */
 .input-group {
     display: flex;
     align-items: center;
@@ -106,12 +111,14 @@ body {
     border-bottom-color: #DE8389;
 }
 
+/* INPUT ICON */
 .input-group > i {
     color: #DE8389;
     margin-right: 12px;
     font-size: 16px;
 }
 
+/* INPUT FIELD */
 .input-group input {
     border: none;
     outline: none;
@@ -125,7 +132,7 @@ body {
     color: #bbb;
 }
 
-/* Password input and custom show/hide button */
+/* PASSWORD FIELD */
 .password-group {
     position: relative;
     padding-right: 44px;
@@ -135,12 +142,13 @@ body {
     padding-right: 8px;
 }
 
-/* Hide browser-native password reveal/clear controls so only custom eye is shown */
+/* HIDE DEFAULT PASSWORD ICONS */
 .password-group input::-ms-reveal,
 .password-group input::-ms-clear {
     display: none;
 }
 
+/* PASSWORD EYE BUTTON */
 .password-toggle {
     position: absolute;
     right: 0;
@@ -169,7 +177,7 @@ body {
     color: #c96e77;
 }
 
-/* Admin login theme overrides */
+/* ADMIN LOGIN COLORS */
 body.admin-login {
     background: linear-gradient(135deg, #5c1d2c 0%, #7a2e42 45%, #f6dbe2 100%);
     display: flex;
@@ -202,10 +210,6 @@ body.admin-login .btn {
 
 body.admin-login .btn:hover {
     box-shadow: 0 6px 20px rgba(92, 29, 44, 0.36);
-}
-
-body.admin-login .social-icon:hover {
-    border-color: #5c1d2c;
 }
 
 body.admin-login .form-container {
@@ -244,7 +248,7 @@ body.admin-login .signup-link {
     margin-top: 22px;
 }
 
-/* Remember me and forgot password row */
+/* REMEMBER / FORGOT ROW */
 .remember-forgot {
     display: flex;
     justify-content: space-between;
@@ -253,6 +257,7 @@ body.admin-login .signup-link {
     font-size: 13px;
 }
 
+/* REMEMBER CHECKBOX */
 .remember label {
     cursor: pointer;
     display: flex;
@@ -266,6 +271,7 @@ body.admin-login .signup-link {
     accent-color: #DE8389;
 }
 
+/* FORGOT LINK */
 .forgot {
     color: #DE8389;
     text-decoration: none;
@@ -277,7 +283,7 @@ body.admin-login .signup-link {
     text-decoration: underline;
 }
 
-/* Main submit button */
+/* SUBMIT BUTTON */
 .btn {
     width: 100%;
     padding: 14px;
@@ -302,46 +308,7 @@ body.admin-login .signup-link {
     transform: translateY(0);
 }
 
-/* Social login icon row */
-.social-login {
-    text-align: center;
-    margin: 25px 0;
-}
-
-.social-text {
-    font-size: 13px;
-    color: #999;
-    margin-bottom: 12px;
-}
-
-.social-icons {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-}
-
-.social-icon {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    font-size: 20px;
-    background: #f5f5f5;
-    color: #DE8389;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
-}
-
-.social-icon:hover {
-    background: white;
-    border-color: #DE8389;
-    transform: scale(1.1);
-}
-
-/* Signup and secondary auth links */
+/* SIGN UP LINKS */
 .signup-link {
     text-align: center;
     font-size: 13px;
@@ -361,7 +328,7 @@ body.admin-login .signup-link {
     text-decoration: underline;
 }
 
-/* Small-screen auth card adjustments */
+/* MOBILE LOGIN */
 @media (max-width: 480px) {
     .container {
         margin: 20px;
@@ -378,13 +345,14 @@ body.admin-login .signup-link {
     }
 }
 
-/* Legacy dashboard layout styles kept for pages that still load Login.css */
+/* OLD DASHBOARD */
 .dashboard-container {
     display: flex;
     height: 100vh;
     background: white;
 }
 
+/* OLD SIDEBAR */
 .sidebar {
     width: 250px;
     background: white;
@@ -423,6 +391,7 @@ body.admin-login .signup-link {
     color: #DE8389;
 }
 
+/* OLD MAIN CONTENT */
 .main-content {
     flex: 1;
     padding: 30px;
@@ -494,6 +463,7 @@ body.admin-login .signup-link {
     gap: 20px;
 }
 
+/* OLD MEDICINE CARD */
 .medicine-card {
     background: white;
     padding: 20px;
@@ -539,7 +509,7 @@ body.admin-login .signup-link {
     background: #d07078;
 }
 
-/* Legacy modal styles */
+/* OLD POPUP */
 .modal {
     display: none;
     position: fixed;
@@ -557,6 +527,7 @@ body.admin-login .signup-link {
     justify-content: center;
 }
 
+/* OLD POPUP BOX */
 .modal-content {
     background: white;
     padding: 30px;
@@ -625,11 +596,12 @@ body.admin-login .signup-link {
     background: #d07078;
 }
 
-/* Legacy profile page styles */
+/* OLD PROFILE */
 .profile-section {
     max-width: 600px;
 }
 
+/* OLD PROFILE CARD */
 .profile-card {
     background: white;
     padding: 30px;
@@ -710,7 +682,7 @@ body.admin-login .signup-link {
     margin: 10px 0;
 }
 
-/* Legacy dashboard mobile adjustments */
+/* OLD MOBILE LAYOUT */
 @media (max-width: 768px) {
     .dashboard-container {
         flex-direction: column;
@@ -740,7 +712,7 @@ body.admin-login .signup-link {
     }
 }
 
-/* Alert and flash message states */
+/* MESSAGES */
 .auth-message,
 .message {
     margin: 0 0 14px;
