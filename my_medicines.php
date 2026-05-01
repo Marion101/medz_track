@@ -8,6 +8,7 @@ session_start();
 require_once 'db.php';
 require_once 'auth.php';
 
+// Check login
 ensure_user_table($conn);
 require_auth($conn);
 
@@ -16,6 +17,7 @@ if (!isset($_SESSION['user_email'])) {
     exit;
 }
 
+// Make sure the needed database fields exist
 $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS name VARCHAR(100) DEFAULT NULL AFTER id");
 $conn->query(
     "CREATE TABLE IF NOT EXISTS medicines (
@@ -35,6 +37,7 @@ $email = $_SESSION['user_email'];
 $message = null;
 $messageType = 'success';
 
+// Delete a medicine
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_medicine_id'])) {
     $deleteId = (int) $_POST['delete_medicine_id'];
     $lookup = $conn->prepare('SELECT medicine_name, expiry_date FROM medicines WHERE id = ? AND user_email = ? LIMIT 1');
@@ -70,6 +73,7 @@ if (isset($_GET['updated'])) {
     $messageType = 'success';
 }
 
+// Get all medicines to show on the page
 $medicines = $conn->query(
     'SELECT m.id, m.user_email, m.medicine_name, m.dosage, m.quantity, m.expiry_date, m.category, u.name AS owner_name
      FROM medicines m
@@ -83,11 +87,13 @@ $medicines = $conn->query(
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Medicines-medztrack</title>
+    <!-- Page styles -->
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="<?= htmlspecialchars(theme_body_class()) ?>">
     <div class="dashboard-container">
+        <!-- Sidebar menu -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h1><i class="fas fa-pills"></i> Medz track</h1>
@@ -106,6 +112,7 @@ $medicines = $conn->query(
         </aside>
 
         <main class="main-content">
+            <!-- Page header and search box -->
             <header class="top-header">
                 <a href="dashboard.php" class="back-btn">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -118,10 +125,12 @@ $medicines = $conn->query(
                 </div>
             </header>
 
+            <!-- Success or error message -->
             <?php if ($message !== null): ?>
                 <div class="message <?= htmlspecialchars($messageType) ?>"><?= htmlspecialchars($message) ?></div>
             <?php endif; ?>
 
+            <!-- Medicine cards -->
             <section class="medicines-section">
                 <h3>All Saved Medicines</h3>
                 <div class="medicines-list" id="medicines-list">
@@ -158,6 +167,7 @@ $medicines = $conn->query(
         </main>
     </div>
     <script>
+// Search medicines on this page
 function filterMedicines(query) {
     const q = query.toLowerCase().trim();
     document.querySelectorAll('#medicines-list .medicine-card').forEach(card => {

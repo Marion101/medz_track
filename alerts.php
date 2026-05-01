@@ -8,6 +8,7 @@ session_start();
 require_once 'db.php';
 require_once 'auth.php';
 
+// Check login
 ensure_user_table($conn);
 require_auth($conn);
 
@@ -18,6 +19,7 @@ if (!isset($_SESSION['user_email'])) {
 
 $email = $_SESSION['user_email'];
 
+// Make sure the medicines table exists
 $conn->query(
     "CREATE TABLE IF NOT EXISTS medicines (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -34,9 +36,10 @@ $medicines = $conn->query(
     'SELECT m.medicine_name, m.dosage, m.quantity, m.expiry_date, m.user_email, u.name AS owner_name
      FROM medicines m
      LEFT JOIN users u ON m.user_email = u.email
-     ORDER BY m.expiry_date ASC, m.id DESC'
+    ORDER BY m.expiry_date ASC, m.id DESC'
 )->fetch_all(MYSQLI_ASSOC);
 
+// Build the alert list
 $today = new DateTimeImmutable('today');
 $alerts = [];
 
@@ -73,11 +76,13 @@ foreach ($medicines as $medicine) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alerts-medztrack</title>
+    <!-- Page styles -->
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="<?= htmlspecialchars(theme_body_class()) ?>">
     <div class="dashboard-container">
+        <!-- Sidebar menu -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h1><i class="fas fa-pills"></i> Medz track</h1>
@@ -96,6 +101,7 @@ foreach ($medicines as $medicine) {
         </aside>
 
         <main class="main-content">
+            <!-- Page header -->
             <header class="top-header">
                 <a href="dashboard.php" class="back-btn">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -105,6 +111,7 @@ foreach ($medicines as $medicine) {
                 <h2>Alerts</h2>
             </header>
 
+            <!-- Alert cards -->
             <section class="medicines-section">
                 <h3>Important Updates</h3>
                 <div class="medicines-list">

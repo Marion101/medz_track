@@ -8,9 +8,11 @@ session_start();
 require_once 'db.php';
 require_once 'auth.php';
 
+// Prepare login system
 ensure_user_table($conn);
 bootstrap_session_from_cookie($conn);
 
+// Send logged-in users to the right page
 if (isset($_SESSION['user_email'])) {
     $sessionRole = (string) ($_SESSION['user_role'] ?? 'user');
     if ($sessionRole === 'admin') {
@@ -24,6 +26,7 @@ if (isset($_SESSION['user_email'])) {
 
 $error = null;
 
+// Handle login form
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = strtolower(trim((string) ($_POST['email'] ?? '')));
     $password = (string) ($_POST['password'] ?? '');
@@ -98,20 +101,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login-medztrack</title>
+    <!-- Page styles -->
     <link rel="stylesheet" href="Login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container auth-container">
+        <!-- Login and sign up tabs -->
         <div class="tabs">
             <a href="login.php" class="tab active">Login</a>
             <a href="register.php" class="tab">Sign Up</a>
         </div>
  
         <div class="form-container">
+            <!-- Login form -->
             <form class="form active" id="login-form" action="" method="post" autocomplete="on">
                 <h2>Welcome!</h2>
 
+                <!-- Error message -->
                 <?php if ($error !== null): ?>
                     <p class="auth-message error"><?= htmlspecialchars($error) ?></p>
                 <?php endif; ?>
@@ -147,6 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
     <script>
+        // Show or hide the password
         const passwordInput = document.getElementById('login-password');
         const togglePassword = document.getElementById('toggle-password');
 

@@ -8,10 +8,12 @@ session_start();
 require_once 'db.php';
 require_once 'auth.php';
 
+// Prepare admin system
 ensure_user_table($conn);
 ensure_activity_log_table($conn);
 bootstrap_session_from_cookie($conn);
 
+// Check admin login
 if (!isset($_SESSION['user_email'])) {
     header('Location: admin_login.php');
     exit;
@@ -39,6 +41,7 @@ if ($displayName === '') {
 $flash = $_SESSION['dev_flash'] ?? null;
 unset($_SESSION['dev_flash']);
 
+// Save a message for the next page load
 function dev_flash(string $type, string $message): void
 {
     $_SESSION['dev_flash'] = [
@@ -47,27 +50,14 @@ function dev_flash(string $type, string $message): void
     ];
 }
 
+// Reload this page
 function dev_redirect(): void
 {
     header('Location: admin_logs.php');
     exit;
 }
 
-function bind_query_params(mysqli_stmt $stmt, string $types, array $params): void
-{
-    if ($types === '' || $params === []) {
-        return;
-    }
-
-    $refs = [];
-    foreach ($params as $index => $value) {
-        $refs[$index] = &$params[$index];
-    }
-
-    array_unshift($refs, $types);
-    $stmt->bind_param(...$refs);
-}
-
+// Handle admin actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = (string) ($_POST['action'] ?? '');
 
@@ -172,6 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Dashboard totals
 $usersCount = (int) ($conn->query('SELECT COUNT(*) AS total FROM users')->fetch_assoc()['total'] ?? 0);
 $medicinesCount = (int) ($conn->query('SELECT COUNT(*) AS total FROM medicines')->fetch_assoc()['total'] ?? 0);
 $expiredCount = (int) ($conn->query('SELECT COUNT(*) AS total FROM medicines WHERE expiry_date < CURDATE()')->fetch_assoc()['total'] ?? 0);
@@ -183,6 +174,7 @@ $logAction = trim((string) ($_GET['action'] ?? ''));
 $dateFrom = trim((string) ($_GET['date_from'] ?? ''));
 $dateTo = trim((string) ($_GET['date_to'] ?? ''));
 
+// Clean up filter dates
 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateFrom)) {
     $dateFrom = '';
 }
@@ -192,6 +184,7 @@ if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateTo)) {
 
 $actionOptions = $conn->query('SELECT DISTINCT action FROM activity_log ORDER BY action ASC')->fetch_all(MYSQLI_ASSOC);
 
+// Build log filters
 $sql = 'SELECT user_email, action, details, created_at FROM activity_log WHERE 1=1';
 $types = '';
 $params = [];
@@ -224,7 +217,7 @@ if ($dateTo !== '') {
 
 $sql .= ' ORDER BY created_at DESC, id DESC LIMIT 100';
 $logsStmt = $conn->prepare($sql);
-bind_query_params($logsStmt, $types, $params);
+bind_stmt_params($logsStmt, $types, $params);
 $logsStmt->execute();
 $logs = $logsStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $logsStmt->close();
@@ -235,11 +228,13 @@ $logsStmt->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Logs-medztrack</title>
+    <!-- Page styles -->
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="<?= htmlspecialchars(theme_body_class('admin-console')) ?>">
     <div class="dashboard-container">
+                <!-- Admin sidebar menu -->
                 <aside class="sidebar">
             <div class="sidebar-header">
                 <h1><i class="fas fa-shield-halved"></i> Admin</h1>
@@ -257,14 +252,17 @@ $logsStmt->close();
             </form>
         </aside>
 <main class="main-content">
+            <!-- Page header -->
             <header class="top-header" id="overview">
                 <h2>Admin, <span id="username"><?= htmlspecialchars($displayName) ?></span></h2>
             </header>
 
+            <!-- Success or error message -->
             <?php if ($flash !== null): ?>
                 <div class="message <?= htmlspecialchars((string) $flash['type']) ?>"><?= htmlspecialchars((string) $flash['message']) ?></div>
             <?php endif; ?>
 
+            <!-- Log filters and log table -->
             <section class="admin-section">
                 <div class="dev-panel" id="logs">
                     <h3>Activity Logs</h3>

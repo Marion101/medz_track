@@ -8,6 +8,7 @@ session_start();
 require_once 'db.php';
 require_once 'auth.php';
 
+// Check login
 ensure_user_table($conn);
 require_auth($conn);
 
@@ -22,6 +23,7 @@ $messageType = 'error';
 $categoryOptions = ['Pain Relief', 'Cold & Flu', 'Vitamins', 'Digestive', 'Other'];
 $todayDate = (new DateTimeImmutable('today'))->format('Y-m-d');
 
+// Make sure the medicines table exists
 $conn->query(
     "CREATE TABLE IF NOT EXISTS medicines (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -39,6 +41,7 @@ $conn->query("ALTER TABLE medicines ADD COLUMN IF NOT EXISTS category VARCHAR(10
 $conn->query("ALTER TABLE medicines ADD COLUMN IF NOT EXISTS added_by_email VARCHAR(255) DEFAULT NULL AFTER user_email");
 $conn->query("UPDATE medicines SET added_by_email = user_email WHERE added_by_email IS NULL OR added_by_email = ''");
 
+// Save the new medicine
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $medicineName = trim((string) ($_POST['medicine_name'] ?? ''));
     $dosage = trim((string) ($_POST['dosage'] ?? ''));
@@ -82,11 +85,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Medicine-medztrack</title>
+    <!-- Page styles -->
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="<?= htmlspecialchars(theme_body_class()) ?>">
     <div class="dashboard-container">
+        <!-- Sidebar menu -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h1><i class="fas fa-pills"></i> Medz track</h1>
@@ -105,6 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </aside>
 
         <main class="main-content">
+            <!-- Page header -->
             <header class="top-header">
                 <a href="dashboard.php" class="back-btn">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -114,10 +120,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h2>Add Medicine</h2>
             </header>
 
+            <!-- Error message -->
             <?php if ($message !== null): ?>
                 <div class="message <?= htmlspecialchars($messageType) ?>"><?= htmlspecialchars($message) ?></div>
             <?php endif; ?>
 
+            <!-- Add medicine form -->
             <section class="medicines-section">
                 <form method="post" action="" class="modal-content medicine-form-panel">
                     <div class="form-group">

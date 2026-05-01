@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
+/* Global reset and page defaults */
 * {
     margin: 0;
     padding: 0;
@@ -17,7 +18,7 @@ body {
     color: #333;
 }
 
-
+/* Main dashboard shell and sidebar navigation */
 .dashboard-container {
     display: flex;
     min-height: 100vh;
@@ -125,7 +126,7 @@ body {
     z-index: 1;
 }
 
-/* Header actions */
+/* Page header, search, and action buttons */
 .top-header {
     display: flex;
     justify-content: space-between;
@@ -175,6 +176,7 @@ body {
 /* Tweak stat icons */
 .stat-icon i { color: #8a5760; font-size: 18px; }
 
+/* Dashboard title, quote banner, and helper note */
 .top-header h2 {
     font-size: 28px;
     color: #333;
@@ -227,7 +229,7 @@ body {
     color: #c45d6b;
 }
 
-
+/* Dashboard statistic cards */
 .stats-section {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -314,6 +316,7 @@ body {
     color: #DE8389;
 }
 
+/* Primary action buttons */
 .add-btn {
     background: linear-gradient(135deg, #DE8389 0%, #F4C9D6 100%);
     color: white;
@@ -335,6 +338,7 @@ body {
     box-shadow: 0 6px 20px rgba(222, 131, 137, 0.4);
 }
 
+/* Medicine card grid and card details */
 .medicines-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -429,7 +433,7 @@ body {
     background: linear-gradient(135deg, #ff6b6b 0%, #ff9b9b 100%);
 }
 
-/* Empty state */
+/* Empty state shown when no data is available */
 .empty-state {
     padding: 40px;
     text-align: center;
@@ -444,7 +448,7 @@ body {
     margin-bottom: 10px;
 }
 
-/* Modal */
+/* Modal dialog layout and animation */
 .modal {
     display: none;
     position: fixed;
@@ -510,6 +514,7 @@ body {
     color: #667eea;
 }
 
+/* Shared form fields and submit buttons */
 .form-group {
     margin-bottom: 18px;
 }
@@ -578,7 +583,7 @@ body {
     width: 100%;
 }
 
-/* Profile Page */
+/* Profile page layout, avatar, stats, and account actions */
 .profile-section {
     max-width: 900px;
     display: flex;
@@ -851,7 +856,7 @@ body {
     transform: translateX(22px);
 }
 
-
+/* About/settings informational card */
 .about-card {
     background: white;
     padding: 25px;
@@ -873,6 +878,7 @@ body {
     line-height: 1.6;
 }
 
+/* Mobile layout adjustments */
 @media (max-width: 768px) {
     .dashboard-container {
         flex-direction: column;
@@ -937,7 +943,7 @@ body {
     }
 }
 
-/* Message states */
+/* Alert and flash message states */
 .auth-message,
 .message {
     margin: 0 0 14px;
@@ -977,7 +983,7 @@ body {
     border-left-color: #3b82f6;
 }
 
-/* Admin side */
+/* Admin section panels and data tables */
 .admin-section {
     display: grid;
     grid-template-columns: 1fr;
@@ -1057,7 +1063,7 @@ body {
     padding: 20px 10px;
 }
 
-/* Admin admin controls */
+/* Admin inline controls and developer action buttons */
 .dev-actions {
     display: flex;
     flex-wrap: wrap;
@@ -1105,7 +1111,7 @@ body {
     background: linear-gradient(135deg, #6bcf7f 0%, #9ee6b5 100%);
 }
 
-/* Admin console theme */
+/* Admin console color overrides */
 .admin-console .sidebar-header h1 {
     color: #5c1d2c;
 }
@@ -1168,7 +1174,7 @@ body {
     color: white;
 }
 
-/* Dark theme */
+/* Dark theme overrides */
 body.dark-theme {
     background: linear-gradient(180deg, #12161c 0%, #0f1218 50%, #0b0e13 100%);
     color: #e8edf4;

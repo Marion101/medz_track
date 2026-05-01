@@ -8,6 +8,7 @@ session_start();
 require_once 'db.php';
 require_once 'auth.php';
 
+// Check login
 ensure_user_table($conn);
 require_auth($conn);
 
@@ -17,6 +18,8 @@ if (!isset($_SESSION['user_email'])) {
 }
 
 $email = (string) $_SESSION['user_email'];
+
+// Get current user name
 $userStmt = $conn->prepare('SELECT name FROM users WHERE email = ? LIMIT 1');
 $userStmt->bind_param('s', $email);
 $userStmt->execute();
@@ -28,6 +31,7 @@ if ($displayName === '') {
     $displayName = $email;
 }
 
+// Read calendar filters
 $todayDate = (new DateTimeImmutable('today'))->format('Y-m-d');
 $selectedMonth = trim((string) ($_GET['month'] ?? ''));
 if ($selectedMonth !== '' && !preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $selectedMonth)) {
@@ -41,6 +45,7 @@ if ($selectedMonth !== '' && $selectedDay !== '' && strpos($selectedDay, $select
     $selectedDay = '';
 }
 
+// Get months that have expiry dates
 $availableMonths = $conn->query(
     "SELECT DISTINCT DATE_FORMAT(expiry_date, '%Y-%m') AS month_key
      FROM medicines
@@ -48,6 +53,7 @@ $availableMonths = $conn->query(
      ORDER BY month_key DESC"
 )->fetch_all(MYSQLI_ASSOC);
 
+// Get days for the selected month
 $availableDaysSql =
     "SELECT DISTINCT DATE(expiry_date) AS day_key
      FROM medicines
@@ -61,13 +67,12 @@ if ($selectedMonth !== '') {
 }
 $availableDaysSql .= " ORDER BY day_key DESC";
 $availableDaysStmt = $conn->prepare($availableDaysSql);
-if ($dayTypes !== '') {
-    $availableDaysStmt->bind_param($dayTypes, ...$dayValues);
-}
+bind_stmt_params($availableDaysStmt, $dayTypes, $dayValues);
 $availableDaysStmt->execute();
 $availableDays = $availableDaysStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $availableDaysStmt->close();
 
+// Labels shown on the page
 $monthLabel = 'All months';
 if ($selectedMonth !== '') {
     $monthDate = DateTimeImmutable::createFromFormat('Y-m', $selectedMonth);
@@ -83,6 +88,7 @@ if ($selectedDay !== '') {
     }
 }
 
+// Build the calendar query
 $whereParts = ['m.expiry_date IS NOT NULL'];
 $bindTypes = '';
 $bindValues = [];
@@ -112,9 +118,7 @@ $calendarSql =
     " ORDER BY m.expiry_date ASC, m.id DESC
       LIMIT 300";
 $calendarStmt = $conn->prepare($calendarSql);
-if ($bindTypes !== '') {
-    $calendarStmt->bind_param($bindTypes, ...$bindValues);
-}
+bind_stmt_params($calendarStmt, $bindTypes, $bindValues);
 $calendarStmt->execute();
 $calendarRows = $calendarStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $calendarStmt->close();
@@ -125,11 +129,13 @@ $calendarStmt->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendar-medztrack</title>
+    <!-- Page styles -->
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="<?= htmlspecialchars(theme_body_class()) ?>">
     <div class="dashboard-container">
+        <!-- Sidebar menu -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h1><i class="fas fa-pills"></i> Medz track</h1>
@@ -148,10 +154,12 @@ $calendarStmt->close();
         </aside>
 
         <main class="main-content">
+            <!-- Page header -->
             <header class="top-header">
                 <h2>Expiry Calendar</h2>
             </header>
 
+            <!-- Current filter summary -->
             <div class="dashboard-note">
                 <i class="fas fa-circle-info"></i>
                 <span>
@@ -161,6 +169,7 @@ $calendarStmt->close();
                 </span>
             </div>
 
+            <!-- Calendar filters and table -->
             <section class="medicines-section" style="margin-top: 10px;">
                 <h3>Filter Calendar</h3>
                 <form method="get" action="user_calendar.php" class="dev-inline-form" style="margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">

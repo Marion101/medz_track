@@ -8,10 +8,12 @@ session_start();
 require_once 'db.php';
 require_once 'auth.php';
 
+// Prepare admin system
 ensure_user_table($conn);
 ensure_activity_log_table($conn);
 bootstrap_session_from_cookie($conn);
 
+// Make sure the medicines table exists
 $conn->query(
     "CREATE TABLE IF NOT EXISTS medicines (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -29,6 +31,7 @@ $conn->query("ALTER TABLE medicines ADD COLUMN IF NOT EXISTS category VARCHAR(10
 $conn->query("ALTER TABLE medicines ADD COLUMN IF NOT EXISTS added_by_email VARCHAR(255) DEFAULT NULL AFTER user_email");
 $conn->query("UPDATE medicines SET added_by_email = user_email WHERE added_by_email IS NULL OR added_by_email = ''");
 
+// Check admin login
 if (!isset($_SESSION['user_email'])) {
     header('Location: admin_login.php');
     exit;
@@ -57,6 +60,7 @@ $todayDate = (new DateTimeImmutable('today'))->format('Y-m-d');
 $flash = $_SESSION['dev_flash'] ?? null;
 unset($_SESSION['dev_flash']);
 
+// Save a message for the next page load
 function dev_flash(string $type, string $message): void
 {
     $_SESSION['dev_flash'] = [
@@ -65,12 +69,14 @@ function dev_flash(string $type, string $message): void
     ];
 }
 
+// Reload this page
 function dev_redirect(): void
 {
     header('Location: admin_medicines.php');
     exit;
 }
 
+// Handle admin medicine actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = (string) ($_POST['action'] ?? '');
 
@@ -228,12 +234,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Dashboard totals
 $usersCount = (int) ($conn->query('SELECT COUNT(*) AS total FROM users')->fetch_assoc()['total'] ?? 0);
 $medicinesCount = (int) ($conn->query('SELECT COUNT(*) AS total FROM medicines')->fetch_assoc()['total'] ?? 0);
 $expiredCount = (int) ($conn->query('SELECT COUNT(*) AS total FROM medicines WHERE expiry_date < CURDATE()')->fetch_assoc()['total'] ?? 0);
 $lowStockCount = (int) ($conn->query('SELECT COUNT(*) AS total FROM medicines WHERE quantity <= 5')->fetch_assoc()['total'] ?? 0);
 $adminCount = (int) ($conn->query("SELECT COUNT(*) AS total FROM users WHERE role = 'admin'")->fetch_assoc()['total'] ?? 0);
 
+// Data for the admin tables and forms
 $users = $conn->query('SELECT id, name, email, phone, role, created_at FROM users ORDER BY created_at DESC, id DESC LIMIT 25')->fetch_all(MYSQLI_ASSOC);
 $medicines = $conn->query('SELECT m.id, m.user_email, m.medicine_name, m.category, m.quantity, m.expiry_date, m.created_at, u.name AS user_name FROM medicines m LEFT JOIN users u ON m.user_email = u.email ORDER BY m.created_at DESC, m.id DESC LIMIT 25')->fetch_all(MYSQLI_ASSOC);
 $logs = $conn->query('SELECT user_email, action, details, created_at FROM activity_log ORDER BY created_at DESC, id DESC LIMIT 25')->fetch_all(MYSQLI_ASSOC);
@@ -245,11 +253,13 @@ $allUsers = $conn->query('SELECT email, name FROM users ORDER BY name ASC, email
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Medicines-medztrack</title>
+    <!-- Page styles -->
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="<?= htmlspecialchars(theme_body_class('admin-console')) ?>">
     <div class="dashboard-container">
+                <!-- Admin sidebar menu -->
                 <aside class="sidebar">
             <div class="sidebar-header">
                 <h1><i class="fas fa-shield-halved"></i> Admin</h1>
@@ -267,14 +277,17 @@ $allUsers = $conn->query('SELECT email, name FROM users ORDER BY name ASC, email
             </form>
         </aside>
 <main class="main-content">
+            <!-- Page header -->
             <header class="top-header" id="overview">
                 <h2>Admin, <span id="username"><?= htmlspecialchars($displayName) ?></span></h2>
             </header>
 
+            <!-- Success or error message -->
             <?php if ($flash !== null): ?>
                 <div class="message <?= htmlspecialchars((string) $flash['type']) ?>"><?= htmlspecialchars((string) $flash['message']) ?></div>
             <?php endif; ?>
 
+            <!-- Medicine form and medicine table -->
             <section class="admin-section">
                 <div class="dev-panel" id="medicines">
                     <h3>Manage Medicines</h3>

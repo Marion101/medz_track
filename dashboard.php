@@ -8,6 +8,7 @@ session_start();
 require_once 'db.php';
 require_once 'auth.php';
 
+// Check login
 ensure_user_table($conn);
 require_auth($conn);
 
@@ -35,6 +36,7 @@ $email = $_SESSION['user_email'];
 $message = isset($_GET['added']) ? 'Medicine added successfully.' : null;
 $messageType = 'success';
 
+// Get current user name
 $userStmt = $conn->prepare('SELECT name FROM users WHERE email = ?');
 $userStmt->bind_param('s', $email);
 $userStmt->execute();
@@ -47,6 +49,7 @@ if ($displayName === '') {
     $displayName = $email;
 }
 
+// Get medicine dates for the dashboard totals
 $medicines = $conn->query(
     'SELECT m.expiry_date
      FROM medicines m
@@ -60,6 +63,7 @@ $lowStock = (int) ($conn->query('SELECT COUNT(*) AS total FROM medicines WHERE q
 $addedToday = (int) ($conn->query('SELECT COUNT(*) AS total FROM medicines WHERE DATE(created_at) = CURDATE()')->fetch_assoc()['total'] ?? 0);
 $today = new DateTimeImmutable('today');
 
+// Count expired and expiring medicines
 foreach ($medicines as $medicine) {
     $expiryDate = DateTimeImmutable::createFromFormat('Y-m-d', (string) $medicine['expiry_date']) ?: $today;
     $daysLeft = (int) $today->diff($expiryDate)->format('%r%a');
@@ -78,11 +82,13 @@ foreach ($medicines as $medicine) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard-medztrack</title>
+    <!-- Page styles -->
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="<?= htmlspecialchars(theme_body_class()) ?>">
     <div class="dashboard-container">
+        <!-- Sidebar menu -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h1><i class="fas fa-pills"></i> Medz track</h1>
@@ -101,6 +107,7 @@ foreach ($medicines as $medicine) {
         </aside>
 
         <main class="main-content">
+            <!-- Page header -->
             <header class="top-header">
         <h2>Hey, <span id="username"><?= htmlspecialchars($displayName) ?></span>!</h2>
                 <div class="header-actions">
@@ -108,10 +115,12 @@ foreach ($medicines as $medicine) {
                 </div>
             </header>
 
+            <!-- Success or error message -->
             <?php if ($message !== null): ?>
                 <div class="message <?= htmlspecialchars($messageType) ?>"><?= htmlspecialchars($message) ?></div>
             <?php endif; ?>
 
+            <!-- Main dashboard summary -->
             <div class="dashboard-note">
                 <i class="fas fa-circle-info"></i>
                 <span>
@@ -121,6 +130,7 @@ foreach ($medicines as $medicine) {
                 </span>
             </div>
 
+            <!-- Main statistics -->
             <section class="stats-section">
                 <div class="stat-card">
                     <div class="stat-icon" style="background: #F4C9D6;">
@@ -154,6 +164,7 @@ foreach ($medicines as $medicine) {
 
             </section>
 
+            <!-- Quick report cards -->
             <section class="medicines-section" style="margin-top: 10px;">
                 <h3>Quick Report</h3>
                 <p class="setting-note" style="margin-bottom: 14px;">Simple summary for today.</p>

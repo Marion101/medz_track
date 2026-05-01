@@ -8,6 +8,7 @@ session_start();
 require_once 'db.php';
 require_once 'auth.php';
 
+// Check login
 ensure_user_table($conn);
 require_auth($conn);
 
@@ -16,6 +17,28 @@ if (!isset($_SESSION['user_email'])) {
     exit;
 }
 
+// Format the join date
+function format_member_since_label(string $createdAt): string
+{
+    $createdAt = trim($createdAt);
+    if ($createdAt === '' || strpos($createdAt, '0000-00-00') === 0) {
+        return 'Unknown';
+    }
+
+    $timestamp = strtotime($createdAt);
+    if ($timestamp === false) {
+        return 'Unknown';
+    }
+
+    $year = (int) date('Y', $timestamp);
+    if ($year < 1970) {
+        return 'Unknown';
+    }
+
+    return date('F Y', $timestamp);
+}
+
+// Schema safety
 $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS name VARCHAR(100) DEFAULT NULL AFTER id");
 $conn->query("ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP AFTER role");
 $conn->query(
@@ -34,6 +57,7 @@ $email = $_SESSION['user_email'];
 $message = null;
 $messageType = 'success';
 
+// Fix missing join dates
 $backfillJoinDate = $conn->prepare(
     "UPDATE users u
      LEFT JOIN (
@@ -49,6 +73,7 @@ $backfillJoinDate->bind_param('s', $email);
 $backfillJoinDate->execute();
 $backfillJoinDate->close();
 
+// Save theme setting
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && (string) ($_POST['action'] ?? '') === 'update_theme') {
     $theme = isset($_POST['dark_mode']) ? 'dark' : 'light';
     $theme = normalize_theme_preference($theme);
@@ -67,6 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (string) ($_POST['action'] ?? '') =
     $themeUpdate->close();
 }
 
+// Get profile data
 $stmt = $conn->prepare('SELECT name, created_at, theme_preference FROM users WHERE email = ?');
 $stmt->bind_param('s', $email);
 $stmt->execute();
@@ -88,17 +114,7 @@ if ($displayName === '') {
     $displayName = $email;
 }
 
-$memberSinceRaw = trim((string) ($user['created_at'] ?? ''));
-$memberSinceLabel = 'Unknown';
-if ($memberSinceRaw !== '' && strpos($memberSinceRaw, '0000-00-00') !== 0) {
-    $memberTimestamp = strtotime($memberSinceRaw);
-    if ($memberTimestamp !== false) {
-        $memberYear = (int) date('Y', $memberTimestamp);
-        if ($memberYear >= 1970) {
-            $memberSinceLabel = date('F Y', $memberTimestamp);
-        }
-    }
-}
+$memberSinceLabel = format_member_since_label((string) ($user['created_at'] ?? ''));
 
 if (isset($_GET['theme_updated'])) {
     $message = 'Theme updated.';
@@ -111,11 +127,13 @@ if (isset($_GET['theme_updated'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile-medztrack</title>
+    <!-- Page styles -->
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="<?= htmlspecialchars(theme_body_class()) ?>">
     <div class="dashboard-container">
+        <!-- Sidebar menu -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h1><i class="fas fa-pills"></i> Medz track</h1>
@@ -134,6 +152,7 @@ if (isset($_GET['theme_updated'])) {
         </aside>
 
         <main class="main-content">
+            <!-- Page header -->
             <header class="top-header">
                 <a href="dashboard.php" class="back-btn">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -143,10 +162,12 @@ if (isset($_GET['theme_updated'])) {
                 <h2>My Profile</h2>
             </header>
 
+            <!-- Success or error message -->
             <?php if ($message !== null): ?>
                 <div class="message <?= htmlspecialchars($messageType) ?>"><?= htmlspecialchars($message) ?></div>
             <?php endif; ?>
 
+            <!-- Profile details -->
             <section class="profile-section">
                 <div class="profile-card">
                     <div class="profile-info">
@@ -176,6 +197,7 @@ if (isset($_GET['theme_updated'])) {
                     </div>
                 </div>
 
+                <!-- Account settings -->
                 <div class="settings-card">
                     <h3>Account Settings</h3>
 
@@ -194,6 +216,7 @@ if (isset($_GET['theme_updated'])) {
                     </div>
                 </div>
 
+                <!-- About box -->
                 <div class="about-card">
                     <h3>About Medz track</h3>
                     <p><strong>Version:</strong> 1.0</p>

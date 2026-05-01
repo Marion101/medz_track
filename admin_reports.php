@@ -36,6 +36,7 @@ if ($displayName === '') {
     $displayName = $currentEmail;
 }
 
+// Filters
 $todayDate = (new DateTimeImmutable('today'))->format('Y-m-d');
 $selectedMonth = trim((string) ($_GET['month'] ?? ''));
 if ($selectedMonth !== '' && !preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $selectedMonth)) {
@@ -110,6 +111,7 @@ $whereClauseRecent = str_replace(
     $whereClause
 );
 
+// Summary stats
 $usersCount = (int) ($conn->query('SELECT COUNT(*) AS total FROM users')->fetch_assoc()['total'] ?? 0);
 
 $statsSql =
@@ -121,9 +123,7 @@ $statsSql =
         SUM(CASE WHEN quantity <= 5 THEN 1 ELSE 0 END) AS low_stock_total
      FROM medicines" . $whereClause;
 $statsStmt = $conn->prepare($statsSql);
-if ($bindTypes !== '') {
-    $statsStmt->bind_param($bindTypes, ...$bindValues);
-}
+bind_stmt_params($statsStmt, $bindTypes, $bindValues);
 $statsStmt->execute();
 $statsRow = $statsStmt->get_result()->fetch_assoc() ?: [];
 $statsStmt->close();
@@ -135,9 +135,7 @@ $expiring30Count = (int) ($statsRow['expiring30_total'] ?? 0);
 $lowStockCount = (int) ($statsRow['low_stock_total'] ?? 0);
 $ownersSql = 'SELECT COUNT(DISTINCT user_email) AS total FROM medicines' . $whereClause;
 $ownersStmt = $conn->prepare($ownersSql);
-if ($bindTypes !== '') {
-    $ownersStmt->bind_param($bindTypes, ...$bindValues);
-}
+bind_stmt_params($ownersStmt, $bindTypes, $bindValues);
 $ownersStmt->execute();
 $ownersWithMedicines = (int) ($ownersStmt->get_result()->fetch_assoc()['total'] ?? 0);
 $ownersStmt->close();
@@ -151,9 +149,7 @@ if ($whereClause === '') {
     $addedTodaySql .= ' AND DATE(created_at) = CURDATE()';
 }
 $addedTodayStmt = $conn->prepare($addedTodaySql);
-if ($addedTodayTypes !== '') {
-    $addedTodayStmt->bind_param($addedTodayTypes, ...$addedTodayValues);
-}
+bind_stmt_params($addedTodayStmt, $addedTodayTypes, $addedTodayValues);
 $addedTodayStmt->execute();
 $addedToday = (int) ($addedTodayStmt->get_result()->fetch_assoc()['total'] ?? 0);
 $addedTodayStmt->close();
@@ -161,6 +157,7 @@ $addedTodayStmt->close();
 $conn->query("ALTER TABLE medicines ADD COLUMN IF NOT EXISTS added_by_email VARCHAR(255) DEFAULT NULL AFTER user_email");
 $conn->query("UPDATE medicines SET added_by_email = user_email WHERE added_by_email IS NULL OR added_by_email = ''");
 
+// Medicines table
 $recentSql =
     "SELECT
         m.medicine_name,
@@ -179,9 +176,7 @@ $recentSql =
      ORDER BY m.created_at DESC, m.id DESC
      LIMIT 200";
 $recentStmt = $conn->prepare($recentSql);
-if ($bindTypes !== '') {
-    $recentStmt->bind_param($bindTypes, ...$bindValues);
-}
+bind_stmt_params($recentStmt, $bindTypes, $bindValues);
 $recentStmt->execute();
 $recentMedicines = $recentStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $recentStmt->close();
@@ -205,9 +200,7 @@ if ($activityWhere !== []) {
 }
 $activitySql .= ' ORDER BY created_at DESC, id DESC LIMIT 100';
 $activityStmt = $conn->prepare($activitySql);
-if ($activityTypes !== '') {
-    $activityStmt->bind_param($activityTypes, ...$activityValues);
-}
+bind_stmt_params($activityStmt, $activityTypes, $activityValues);
 $activityStmt->execute();
 $activityLogs = $activityStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $activityStmt->close();
@@ -240,9 +233,7 @@ if ($expiryWhere !== []) {
 }
 $expirySql .= ' ORDER BY m.expiry_date ASC, m.created_at DESC, m.id DESC LIMIT 300';
 $expiryStmt = $conn->prepare($expirySql);
-if ($expiryTypes !== '') {
-    $expiryStmt->bind_param($expiryTypes, ...$expiryValues);
-}
+bind_stmt_params($expiryStmt, $expiryTypes, $expiryValues);
 $expiryStmt->execute();
 $expiryCalendarRows = $expiryStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $expiryStmt->close();
@@ -256,6 +247,7 @@ $expiryStmt->close();
     <link rel="stylesheet" href="Dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Report page base text and color resets */
         .report-page {
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             color: #1a1a1a !important;
@@ -284,6 +276,8 @@ $expiryStmt->close();
         .report-page .dev-panel h3 {
             color: #2a1a21 !important;
         }
+
+        /* Disable hover effects inherited from shared dashboard styles */
         .report-page a:hover,
         .report-page button:hover,
         .report-page .add-btn:hover,
@@ -294,6 +288,8 @@ $expiryStmt->close();
             filter: none !important;
             background: inherit !important;
         }
+
+        /* Top report intro panel */
         .admin-report-hero {
             background: linear-gradient(135deg, #ffe3ea 0%, #fff5e8 100%);
             border: 1px solid #f7d4dd;
@@ -309,6 +305,8 @@ $expiryStmt->close();
             margin: 0;
             color: #2f2f2f !important;
         }
+
+        /* Report table container and table colors */
         .admin-report-wrap {
             background: #ffffff !important;
             border: 1px solid #f0e5ea;
@@ -335,6 +333,8 @@ $expiryStmt->close();
         .admin-report-wrap .dev-table tbody tr:hover td {
             background: #ffffff !important;
         }
+
+        /* Month and day filter controls */
         .month-filter-form {
             display: flex;
             gap: 10px;
@@ -362,14 +362,20 @@ $expiryStmt->close();
             color: #3b2b32 !important;
             font-size: 14px;
         }
+
+        /* Print button */
         .print-btn {
             text-decoration: none;
             border: none;
             cursor: pointer;
         }
+
+        /* Small status color helpers */
         .soft-pink { background: #ffe8ef; color: #a24c6c; }
         .soft-yellow { background: #fff5d6; color: #9a7a13; }
         .soft-blue { background: #e8f2ff; color: #2f5f9a; }
+
+        /* Rounded status label */
         .pill {
             display: inline-block;
             border-radius: 999px;
@@ -377,6 +383,8 @@ $expiryStmt->close();
             font-size: 12px;
             font-weight: 700;
         }
+
+        /* Keep report print/export areas light even when dark theme is active */
         body.dark-theme.report-page .main-content,
         body.dark-theme.report-page .dev-panel,
         body.dark-theme.report-page .stat-card,
@@ -398,6 +406,8 @@ $expiryStmt->close();
         body.dark-theme.report-page .dev-table tbody tr:hover td {
             background: #ffffff !important;
         }
+
+        /* Print-only layout cleanup */
         @media print {
             body.report-page {
                 background: #fff !important;
@@ -447,7 +457,7 @@ $expiryStmt->close();
 
         <main class="main-content">
             <header class="top-header">
-                <h2>Admin Report, <span id="username"><?= htmlspecialchars($displayName) ?></span></h2>
+                <h2>Admin Report</h2>
             </header>
 
             <div class="admin-report-hero">

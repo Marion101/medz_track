@@ -137,6 +137,15 @@ function log_activity(mysqli $conn, ?string $email, string $action, string $deta
     $stmt->close();
 }
 
+function bind_stmt_params(mysqli_stmt $stmt, string $types, array $values): void
+{
+    if ($types === '' || $values === []) {
+        return;
+    }
+
+    $stmt->bind_param($types, ...$values);
+}
+
 function medicine_is_expired(?string $expiryDate): bool
 {
     if ($expiryDate === null || trim($expiryDate) === '') {
