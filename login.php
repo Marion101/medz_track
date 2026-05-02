@@ -148,13 +148,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="signup-link">
                     <p>Don't have an account? <a href="register.php">Sign up</a></p>
-                    <p><a href="admin_login.php">Admin Login</a></p>
                 </div>
             </form>
         </div>
     </div>
     <script>
-        // Show or hide the password
+        // Show or hide the password- the eye icon
         const passwordInput = document.getElementById('login-password');
         const togglePassword = document.getElementById('toggle-password');
 
