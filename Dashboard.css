@@ -1,6 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
-/* RESET */
+
+/* Dashboard page reset */
 * {
     margin: 0;
     padding: 0;
@@ -18,13 +18,13 @@ body {
     color: #333;
 }
 
-/* PAGE LAYOUT */
+/* Dashboard and admin page layout */
 .dashboard-container {
     display: flex;
     min-height: 100vh;
 }
 
-/* SIDEBAR */
+/* Dashboard sidebar container */
 .sidebar {
     width: 260px;
     background: white;
@@ -36,17 +36,17 @@ body {
     z-index: 1000;
 }
 
-/* SIDEBAR TITLE */
+/* Sidebar title */
 .sidebar-header h1 {
     color: #DE8389;
-    font-size: 22px;
+    font-size:22px;
     margin-bottom: 35px;
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-/* SIDEBAR MENU */
+/* Sidebar navigation menu */
 .sidebar-nav {
     display: flex;
     flex-direction: column;
@@ -54,7 +54,7 @@ body {
     margin-bottom: 30px;
 }
 
-/* SIDEBAR LINK */
+/* Sidebar navigation link */
 .nav-item {
     padding: 12px 15px;
     text-decoration: none;
@@ -75,13 +75,13 @@ body {
     transform: translateX(2px);
 }
 
-/* ACTIVE SIDEBAR LINK */
+/* Active sidebar navigation link */
 .nav-item.active {
     background: linear-gradient(135deg, #DE8389 0%, #F4C9D6 100%);
-    color: white;
+    color: whitesmoke;
 }
 
-/* LOGOUT BUTTON */
+/* Sidebar logout button */
 .logout-btn {
     display: block;
     width: 100%;
@@ -104,7 +104,7 @@ body {
     box-shadow: 0 6px 20px rgba(222, 131, 137, 0.4);
 }
 
-/* BACK BUTTON */
+/* Page back button */
 .back-btn {
     display: flex;
     align-items: center;
@@ -125,7 +125,7 @@ body {
     transform: translateX(-3px);
 }
 
-/* MAIN CONTENT */
+/* Main dashboard content area */
 .main-content {
     flex: 1;
     padding: 30px 40px;
@@ -134,7 +134,7 @@ body {
     z-index: 1;
 }
 
-/* PAGE HEADER */
+/* Page header row */
 .top-header {
     display: flex;
     justify-content: space-between;
@@ -142,7 +142,7 @@ body {
     gap: 16px;
 }
 
-/* HEADER ACTIONS */
+/* Header action buttons and filters */
 .header-actions {
     display: flex;
     align-items: center;
@@ -150,8 +150,7 @@ body {
     flex-wrap: wrap;
 }
 
-.header-actions .add-btn,
-.header-actions .export-btn {
+.header-actions .add-btn {
     margin-bottom: 0;
     display: inline-flex;
     align-items: center;
@@ -160,7 +159,7 @@ body {
     line-height: 1;
 }
 
-/* SEARCH BOX */
+/* Medicine search box */
 .search-box {
     padding: 10px 14px;
     border: 2px solid #f0e6e7;
@@ -169,54 +168,14 @@ body {
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
 }
 
-/* EXPORT BUTTON */
-.export-btn {
-    padding: 10px 14px;
-    border-radius: 10px;
-    border: 1px solid transparent;
-    background: #fff;
-    color: #DE8389;
-    cursor: pointer;
-    font-weight: 600;
-    text-decoration: none;
-    display: inline-block;
-}
-
-.export-btn:hover { background: #fff0f2; }
-
-/* STAT ICON COLOR */
+/* Dashboard stat icon color */
 .stat-icon i { color: #8a5760; font-size: 18px; }
 
-/* DASHBOARD INTRO */
+/* Dashboard heading and summary note */
 .top-header h2 {
     font-size: 28px;
     color: #333;
     margin-bottom: 0;
-}
-
-.daily-quote {
-    background: linear-gradient(135deg, #DE8389 0%, #F4C9D6 100%);
-    padding: 24px 26px;
-    border-radius: 16px;
-    margin: 24px 0 30px;
-    color: white;
-    box-shadow: 0 12px 30px rgba(222, 131, 137, 0.22);
-}
-
-.quote-content {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.quote-content i {
-    font-size: 20px;
-    opacity: 0.95;
-}
-
-.quote-verse {
-    font-size: 13px;
-    opacity: 0.85;
 }
 
 .dashboard-note {
@@ -240,7 +199,7 @@ body {
     color: #c45d6b;
 }
 
-/* STAT CARDS */
+/* Dashboard summary stat cards */
 .stats-section {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -256,7 +215,7 @@ body {
     border-left: none;
 }
 
-/* STAT ICON BOX */
+/* Summary stat icon box */
 .stat-icon {
     width: 52px;
     height: 52px;
@@ -267,29 +226,13 @@ body {
     flex-shrink: 0;
 }
 
-/* STAT TEXT */
+/* Summary stat text */
 .stat-info {
     min-width: 0;
 }
 
 .stat-info .stat-label {
     margin-bottom: 6px;
-}
-
-.quote-section {
-    background: linear-gradient(135deg, #DE8389 0%, #F4C9D6 100%);
-    padding: 25px;
-    border-radius: 12px;
-    margin-bottom: 30px;
-    text-align: center;
-    color: white;
-    box-shadow: 0 4px 15px rgba(222, 131, 137, 0.3);
-}
-
-#quote-text {
-    font-size: 16px;
-    font-style: italic;
-    font-weight: 500;
 }
 
 .stats-container {
@@ -329,7 +272,7 @@ body {
     color: #DE8389;
 }
 
-/* MAIN BUTTON */
+/* Dashboard add medicine button */
 .add-btn {
     background: linear-gradient(135deg, #DE8389 0%, #F4C9D6 100%);
     color: white;
@@ -351,7 +294,7 @@ body {
     box-shadow: 0 6px 20px rgba(222, 131, 137, 0.4);
 }
 
-/* MEDICINE GRID */
+/* My Medicines card grid */
 .medicines-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -365,7 +308,7 @@ body {
     scroll-margin-top: 24px;
 }
 
-/* MEDICINE CARD */
+/* In my medicines- formatting */
 .medicine-card {
     background: white;
     padding: 20px;
@@ -398,7 +341,7 @@ body {
     font-weight: 600;
 }
 
-/* CARD BUTTONS */
+/* Delete/Edit Medicine buttons */
 .card-buttons {
     display: flex;
     gap: 10px;
@@ -440,17 +383,17 @@ body {
     line-height: 1.2;
 }
 
-/* USE BUTTON */
+/* Use medicine action button */
 .use-btn {
     background: linear-gradient(135deg, #6bcf7f 0%, #9ee6b5 100%);
 }
 
-/* DELETE BUTTON */
+/* Delete medicine action button */
 .delete-btn {
     background: linear-gradient(135deg, #ff6b6b 0%, #ff9b9b 100%);
 }
 
-/* EMPTY STATE */
+/* Empty list state */
 .empty-state {
     padding: 40px;
     text-align: center;
@@ -465,7 +408,7 @@ body {
     margin-bottom: 10px;
 }
 
-/* POPUP BACKGROUND */
+/* Modal overlay background */
 .modal {
     display: none;
     position: fixed;
@@ -482,7 +425,7 @@ body {
     display: flex;
 }
 
-/* POPUP BOX */
+/* Modal dialog box */
 .modal-content {
     background: white;
     padding: 35px;
@@ -504,7 +447,7 @@ body {
     }
 }
 
-/* POPUP HEADER */
+/* Modal header */
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -520,7 +463,7 @@ body {
 }
 
 
-/* CLOSE BUTTON */
+/* Modal close button */
 .close-btn {
     background: none;
     border: none;
@@ -534,7 +477,7 @@ body {
     color: #667eea;
 }
 
-/* FORM FIELDS */
+/* Dashboard form fields */
 .form-group {
     margin-bottom: 18px;
 }
@@ -565,7 +508,7 @@ body {
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-/* FORM ROW */
+/* Dashboard form row layout */
 .form-row {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -578,7 +521,7 @@ body {
     gap: 15px;
 }
 
-/* SAVE BUTTON */
+/* Save form button */
 .btn-submit {
     background: linear-gradient(135deg, #DE8389 0%, #F4C9D6 100%);
     color: white;
@@ -596,7 +539,7 @@ body {
     box-shadow: 0 6px 20px rgba(222, 131, 137, 0.4);
 }
 
-/* MEDICINE FORM */
+/* Add/edit medicine form */
 .medicine-form-panel {
     position: static;
     transform: none;
@@ -606,7 +549,7 @@ body {
     width: 100%;
 }
 
-/* PROFILE PAGE */
+/* Profile page layout */
 .profile-section {
     max-width: 900px;
     display: flex;
@@ -614,7 +557,7 @@ body {
     gap: 24px;
 }
 
-/* PROFILE CARD */
+/* Profile information card */
 .profile-card {
     background: white;
     padding: 35px;
@@ -626,80 +569,8 @@ body {
     align-items: center;
 }
 
-/* PROFILE PHOTO AREA */
-.profile-picture-container {
-    text-align: center;
-    position: relative;
-    width: 170px;
-    height: 170px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
 
-.profile-picture-container::before {
-    content: "";
-    position: absolute;
-    width: 150px;
-    height: 150px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-    background: linear-gradient(135deg, #fff7f8 0%, #f8dde4 100%);
-    border: 2px solid #f0cfd6;
-    box-shadow: inset 0 0 0 10px rgba(255, 255, 255, 0.75);
-    z-index: 0;
-}
-
-/* PROFILE PHOTO */
-.profile-picture {
-    width: 126px;
-    height: 126px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid rgba(255, 255, 255, 0.98);
-    background: linear-gradient(135deg, #fdf0f3 0%, #f7d9e1 100%);
-    box-shadow: 0 12px 24px rgba(222, 131, 137, 0.18);
-    transition: all 0.3s ease;
-    position: relative;
-    z-index: 1;
-}
-
-.profile-picture:hover {
-    transform: scale(1.03);
-}
-
-#picture-upload {
-    display: none;
-}
-
-/* PHOTO UPLOAD BUTTON */
-.picture-upload-btn {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #DE8389 0%, #F4C9D6 100%);
-    color: white;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    position: absolute;
-    right: 12px;
-    bottom: 14px;
-    transition: all 0.3s ease;
-    box-shadow: 0 6px 20px rgba(222, 131, 137, 0.25);
-    z-index: 2;
-}
-
-.picture-upload-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(222, 131, 137, 0.35);
-}
-
-/* PROFILE TEXT */
+/* Profile text details */
 .profile-info {
     min-width: 0;
 }
@@ -717,7 +588,7 @@ body {
     margin-bottom: 20px;
 }
 
-/* PROFILE STATS */
+/* Profile statistics */
 .profile-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -753,16 +624,16 @@ body {
     flex-shrink: 0;
 }
 
-/* PROFILE BUTTONS */
+/* Profile action buttons */
 .profile-actions {
     display: flex;
     gap: 14px;
     margin-top: 8px;
 }
 
-/* EDIT / DELETE BUTTONS */
+/* Edit and Logout action buttons under profile */
 .btn-edit,
-.btn-delete {
+.btn-logout{
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -781,18 +652,18 @@ body {
     box-shadow: 0 8px 24px rgba(222, 131, 137, 0.18);
 }
 
-.btn-delete {
+.btn-logout {
     background: #fff1f2;
     color: #d4616b;
     border: 1px solid #f3c6cb;
 }
 
 .btn-edit:hover,
-.btn-delete:hover {
+.btn-logout:hover {
     transform: translateY(-2px);
 }
 
-/* SETTINGS CARD */
+/* Profile settings card */
 .settings-card {
     background: white;
     padding: 28px;
@@ -806,7 +677,7 @@ body {
     color: #333;
 }
 
-/* SETTING ROW */
+/* Profile setting row */
 .setting-item {
     display: flex;
     align-items: center;
@@ -832,7 +703,7 @@ body {
     color: #8d7780;
 }
 
-/* NOTE LABEL */
+/* Setting helper note */
 .setting-note {
     display: inline-flex;
     align-items: center;
@@ -846,7 +717,7 @@ body {
     white-space: nowrap;
 }
 
-/* THEME SWITCH */
+/* Theme preference switch */
 .toggle {
     position: relative;
     display: inline-block;
@@ -861,7 +732,7 @@ body {
     height: 0;
 }
 
-/* SWITCH TRACK */
+/* Theme switch track and handle */
 .slider {
     position: absolute;
     inset: 0;
@@ -892,7 +763,7 @@ body {
     transform: translateX(22px);
 }
 
-/* ABOUT CARD */
+/* Profile about card */
 .about-card {
     background: white;
     padding: 25px;
@@ -914,72 +785,8 @@ body {
     line-height: 1.6;
 }
 
-/* MOBILE LAYOUT */
-@media (max-width: 768px) {
-    .dashboard-container {
-        flex-direction: column;
-    }
 
-    .sidebar {
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid #e0e0e0;
-        padding: 15px;
-    }
-
-    .sidebar-nav {
-        flex-direction: row;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-
-    .nav-item {
-        flex: 1;
-        min-width: 100px;
-        justify-content: center;
-    }
-
-    .main-content {
-        padding: 20px;
-    }
-
-    .medicines-list {
-        grid-template-columns: 1fr;
-    }
-
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-
-    .dashboard-spotlight {
-        grid-template-columns: 1fr;
-    }
-
-    .profile-stats {
-        grid-template-columns: 1fr;
-    }
-
-    .profile-card {
-        grid-template-columns: 1fr;
-        text-align: center;
-    }
-
-    .profile-info {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .profile-actions {
-        flex-direction: column;
-    }
-
-    .top-header h2 {
-        font-size: 22px;
-    }
-}
-
-/* MESSAGES */
+/* Dashboard/admin feedback messages */
 .auth-message,
 .message {
     margin: 0 0 14px;
@@ -1019,7 +826,7 @@ body {
     border-left-color: #3b82f6;
 }
 
-/* ADMIN AREA */
+/* Admin page spacing */
 .admin-section {
     display: grid;
     grid-template-columns: 1fr;
@@ -1027,7 +834,7 @@ body {
     margin-top: 10px;
 }
 
-/* ADMIN PANEL */
+/* Admin content panel where there is manage users, medicines and activity */
 .dev-panel {
     background: white;
     border-radius: 12px;
@@ -1042,25 +849,25 @@ body {
     font-size: 18px;
 }
 
-/* ADMIN FORM */
+/* Admin management form */
 .dev-form-section {
     margin-bottom: 24px;
     padding-bottom: 24px;
-    border-bottom: 1px solid #f0e5e8;
+    border-bottom: 1px solid #dd7793; /* Light pink divider in medicines side admin panel */
 }
 
 .dev-form-section h4 {
     margin-bottom: 16px;
-    color: #555;
+    color: #555; /* Heading color for "Add New Medicine"" and ""Edit Medicine"" sections in admin panel*/
     font-size: 16px;
 }
 
-/* TABLE WRAPPER */
+/* Responsive table wrapper */
 .dev-table-wrap {
     overflow-x: auto;
 }
 
-/* TABLE */
+/* Admin and report tables */
 .dev-table {
     width: 100%;
     border-collapse: collapse;
@@ -1076,44 +883,44 @@ body {
 }
 
 .dev-table th {
-    color: #8d7780;
+    color: #8d7780; /*Colour for (Time, user, action) headings in activity logs table in admin panel*/
     text-transform: uppercase;
     letter-spacing: 0.4px;
     font-size: 12px;
 }
 
 .dev-table tbody tr:hover {
-    background: #fff8f9;
+    background: #DE8389;
 }
 
-/* STATUS LABEL */
+/* Status badge labels */
 .dev-pill {
     display: inline-flex;
     align-items: center;
     padding: 6px 10px;
     border-radius: 999px;
     background: #fff1f2;
-    color: #c95f6b;
+    color: #c95f6b; /* the font colour of action status */
     font-size: 12px;
     font-weight: 600;
 }
 
-/* EMPTY TABLE */
+/* Empty admin table state */
 .empty-cell {
     text-align: center;
     color: #8d7780;
     padding: 20px 10px;
 }
 
-/* ADMIN CONTROLS */
+/* Admin filter and action controls */
 .dev-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 8px; /* spacing*/
     align-items: center;
 }
 
-/* INLINE FORM */
+/* Inline admin form layout */
 .dev-inline-form {
     display: flex;
     gap: 8px;
@@ -1121,24 +928,24 @@ body {
     margin: 0;
 }
 
-/* SELECT INPUT */
+/* Admin  text inputs */
 .dev-select {
     padding: 8px 10px;
     border: 1px solid #ead8db;
     border-radius: 8px;
-    background: white;
+    background: white; /* The colour background of the input areas in users & roles and Activity logs, admin panel */
     color: #333;
     font-family: inherit;
     font-size: 13px;
 }
 
-/* ADMIN BUTTON */
+/* Admin action button */
 .dev-btn {
     padding: 9px 12px;
     border: none;
     border-radius: 8px;
     background: linear-gradient(135deg, #DE8389 0%, #F4C9D6 100%);
-    color: white;
+    color: white;/* color for bttons such as "Create User", "Delete Medicine" and "Reset Data"in admin panel both in users and roles and activity logs */
     font-weight: 600;
     font-size: 13px;
     cursor: pointer;
@@ -1148,25 +955,25 @@ body {
     filter: brightness(0.96);
 }
 
-/* DANGER BUTTON */
+/* Destructive admin action button */
 .dev-btn-danger {
     background: linear-gradient(135deg, #ff6b6b 0%, #ff9b9b 100%);
 }
 
-/* SUCCESS BUTTON */
+/* Success admin action button */
 .dev-btn-success {
     background: linear-gradient(135deg, #6bcf7f 0%, #9ee6b5 100%);
 }
 
-/* ADMIN COLORS */
+/* Admin dashboard theme colors */
 .admin-console .sidebar-header h1 {
-    color: #5c1d2c;
+    color: #5c1d2c; /* colour for the admin header text "Admin" in the sidebar */
 }
 
 
 .admin-console .sidebar-note {
     margin-top: 8px;
-    color: #8d6a75;
+    color: #838d6a;
     font-size: 13px;
     line-height: 1.5;
 }
@@ -1175,21 +982,9 @@ body {
     background: linear-gradient(135deg, #5c1d2c 0%, #7a2e42 100%);
 }
 
-.admin-console .daily-quote {
-    background: linear-gradient(135deg, #5c1d2c 0%, #7a2e42 100%);
-}
-
-.admin-console .export-btn {
-    color: #5c1d2c;
-    border-color: rgba(92, 29, 44, 0.18);
-}
-
-.admin-console .export-btn:hover {
-    background: #f3f5ff;
-}
 
 .admin-console .stat-value {
-    color: #5c1d2c;
+    color: #5c5b1d; /* colour for the stat values in the summary stat cards in admin dashboard */
 }
 
 .admin-console .logout-btn {
@@ -1221,7 +1016,7 @@ body {
     color: white;
 }
 
-/* DARK MODE */
+/* Dark theme overrides */
 body.dark-theme {
     background: linear-gradient(180deg, #12161c 0%, #0f1218 50%, #0b0e13 100%);
     color: #e8edf4;

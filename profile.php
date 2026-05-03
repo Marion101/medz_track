@@ -189,7 +189,7 @@ if (isset($_GET['theme_updated'])) {
                                 <i class="fas fa-edit"></i> Edit Username
                             </a>
                             <form method="post" action="logout.php" class="inline-form wide-form">
-                                <button type="submit" class="btn-delete" id="reset-data-btn">
+                                <button type="submit" class="btn-logout" id="reset-data-btn">
                                     <i class="fas fa-sign-out-alt"></i> Logout
                                 </button>
                             </form>
